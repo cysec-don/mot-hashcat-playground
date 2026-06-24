@@ -155,12 +155,6 @@ function HeroSection() {
               <div className="mt-2 text-cyan-400">
                 hashcat (v6.2.6) starting in autodetect mode
               </div>
-              <div className="text-slate-400 mt-1">
-                OpenCL Platform: NVIDIA CUDA / GeForce RTX 4090
-              </div>
-              <div className="text-slate-400">
-                Device: NVIDIA GeForce RTX 4090, 24576 MB, 128MCU
-              </div>
               <div className="text-emerald-400 mt-2">
                 Speed.#1.........: 100.3 GH/s (11.32ms)
               </div>

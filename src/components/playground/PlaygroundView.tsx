@@ -130,8 +130,6 @@ export function PlaygroundView() {
     const cmd = buildCommand();
     addLine("input", `$ ${cmd}`);
     addLine("info", "hashcat (v6.2.6) starting in autodetect mode");
-    addLine("info", `OpenCL Platform: NVIDIA CUDA / GeForce RTX 4090`);
-    addLine("info", `Device: NVIDIA GeForce RTX 4090, 24576 MB, 128MCU`);
     addLine("info", `Hash.Mode........: ${hashcatMode} (${hashType})`);
     if (customHash) {
       addLine("info", `Hash.Target......: ${customHash.slice(0, 32)}${customHash.length > 32 ? "..." : ""}`);
