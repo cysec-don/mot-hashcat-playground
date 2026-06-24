@@ -100,16 +100,24 @@ function HeroSection() {
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button
               size="lg"
-              onClick={() => setView("auth")}
+              onClick={() => setView("register")}
               className="bg-gradient-to-r from-cyan-400 to-emerald-400 text-[#0B0F19] hover:from-cyan-300 hover:to-emerald-300 font-bold text-base px-8 h-12 pulse-glow"
             >
               <Zap className="h-5 w-5 mr-2" />
-              Start Learning
+              Get Started
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
             <Button
               size="lg"
               variant="outline"
+              onClick={() => setView("login")}
+              className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 hover:text-cyan-200 font-semibold text-base px-8 h-12"
+            >
+              Sign In
+            </Button>
+            <Button
+              size="lg"
+              variant="ghost"
               onClick={() =>
                 document
                   .getElementById("curriculum")
@@ -391,7 +399,7 @@ function CurriculumSection() {
         <div className="mt-12 text-center">
           <Button
             size="lg"
-            onClick={() => setView("auth")}
+            onClick={() => setView("register")}
             className="bg-gradient-to-r from-cyan-400 to-emerald-400 text-[#0B0F19] hover:from-cyan-300 hover:to-emerald-300 font-bold"
           >
             Begin Your Journey
@@ -610,7 +618,7 @@ function PlaygroundPreviewSection() {
           <Button
             size="lg"
             variant="outline"
-            onClick={() => setView("auth")}
+            onClick={() => setView("register")}
             className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 font-semibold"
           >
             <Play className="h-4 w-4 mr-2" />
@@ -814,11 +822,11 @@ function CTASection() {
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
                 size="lg"
-                onClick={() => setView("auth")}
+                onClick={() => setView("register")}
                 className="bg-gradient-to-r from-cyan-400 to-emerald-400 text-[#0B0F19] hover:from-cyan-300 hover:to-emerald-300 font-bold text-base px-8 h-12 pulse-glow"
               >
                 <Zap className="h-5 w-5 mr-2" />
-                Sign In &amp; Start Learning
+                Register &amp; Start Learning
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </div>

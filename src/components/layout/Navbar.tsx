@@ -161,13 +161,23 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button
-              size="sm"
-              onClick={() => setView("auth")}
-              className="bg-gradient-to-r from-cyan-400 to-emerald-400 text-[#0B0F19] hover:from-cyan-300 hover:to-emerald-300 font-bold"
-            >
-              Sign In
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setView("register")}
+                className="border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10 font-semibold"
+              >
+                Register
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => setView("login")}
+                className="bg-gradient-to-r from-cyan-400 to-emerald-400 text-[#0B0F19] hover:from-cyan-300 hover:to-emerald-300 font-bold"
+              >
+                Sign In
+              </Button>
+            </div>
           )}
         </div>
       </div>

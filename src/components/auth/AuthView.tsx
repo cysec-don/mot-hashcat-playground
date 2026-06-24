@@ -23,10 +23,9 @@ import { toast } from "sonner";
 
 type Mode = "register" | "login";
 
-export function AuthView() {
+export function AuthView({ mode }: { mode: Mode }) {
   const { setView } = useApp();
   const { setStudent } = useSession();
-  const [mode, setMode] = useState<Mode>("register");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,11 +33,7 @@ export function AuthView() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const switchMode = (m: Mode) => {
-    setMode(m);
-    setError(null);
-    setPassword("");
-  };
+  const isRegister = mode === "register";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +44,7 @@ export function AuthView() {
       return;
     }
 
-    if (mode === "register") {
+    if (isRegister) {
       if (password.length < 8) {
         setError("Password must be at least 8 characters.");
         return;
@@ -60,7 +55,7 @@ export function AuthView() {
         );
         return;
       }
-      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      if (email && !/^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/.test(email)) {
         setError("Please enter a valid email address.");
         return;
       }
@@ -79,7 +74,7 @@ export function AuthView() {
         body: JSON.stringify({
           action: mode,
           fullName: fullName.trim(),
-          email: mode === "register" && email ? email.trim() : undefined,
+          email: isRegister && email ? email.trim() : undefined,
           password,
         }),
       });
@@ -100,7 +95,7 @@ export function AuthView() {
       localStorage.setItem("mot-token", data.token);
       localStorage.setItem("mot-csrf", data.csrf);
       toast.success(
-        mode === "register"
+        isRegister
           ? `Account created — welcome aboard, ${student.fullName}!`
           : `Welcome back, ${student.fullName}!`
       );
@@ -139,7 +134,7 @@ export function AuthView() {
               />
             </div>
             <h1 className="text-2xl font-bold text-white">
-              {mode === "register" ? (
+              {isRegister ? (
                 <>
                   Create your <span className="cyber-gradient-text">account</span>
                 </>
@@ -150,36 +145,10 @@ export function AuthView() {
               )}
             </h1>
             <p className="mt-2 text-sm text-slate-400">
-              {mode === "register"
+              {isRegister
                 ? "Register with your Full Name and a strong password."
                 : "Welcome back. Sign in with your Full Name and password."}
             </p>
-          </div>
-
-          {/* Mode toggle */}
-          <div className="grid grid-cols-2 gap-1 p-1 mb-5 rounded-lg bg-[#0B0F19] border border-cyan-500/15">
-            <button
-              type="button"
-              onClick={() => switchMode("register")}
-              className={`py-2 text-xs font-medium rounded-md transition ${
-                mode === "register"
-                  ? "bg-cyan-400/15 text-cyan-300 border border-cyan-400/30"
-                  : "text-slate-400 hover:text-cyan-300"
-              }`}
-            >
-              Register
-            </button>
-            <button
-              type="button"
-              onClick={() => switchMode("login")}
-              className={`py-2 text-xs font-medium rounded-md transition ${
-                mode === "login"
-                  ? "bg-cyan-400/15 text-cyan-300 border border-cyan-400/30"
-                  : "text-slate-400 hover:text-cyan-300"
-              }`}
-            >
-              Sign In
-            </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -206,7 +175,7 @@ export function AuthView() {
               </p>
             </div>
 
-            {mode === "register" && (
+            {isRegister && (
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-xs text-slate-300 font-medium">
                   Email <span className="text-slate-500">(optional)</span>
@@ -237,10 +206,10 @@ export function AuthView() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder={mode === "register" ? "Min 8 chars, mixed classes" : "Your password"}
+                  placeholder={isRegister ? "Min 8 chars, mixed classes" : "Your password"}
                   className="pl-10 pr-10 bg-[#0B0F19] border-cyan-500/25 text-white placeholder:text-slate-600 focus:border-cyan-400"
                   required
-                  autoComplete={mode === "register" ? "new-password" : "current-password"}
+                  autoComplete={isRegister ? "new-password" : "current-password"}
                 />
                 <button
                   type="button"
@@ -252,7 +221,7 @@ export function AuthView() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              {mode === "register" && (
+              {isRegister && (
                 <p className="text-[11px] text-slate-500">
                   Min 8 chars · include upper &amp; lower case, a digit, and a special character.
                 </p>
@@ -274,21 +243,37 @@ export function AuthView() {
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {mode === "register" ? "Creating account..." : "Signing in..."}
+                  {isRegister ? "Creating account..." : "Signing in..."}
                 </>
               ) : (
                 <>
-                  {mode === "register" ? "Create Account" : "Sign In"}
+                  {isRegister ? "Create Account" : "Sign In"}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </>
               )}
             </Button>
           </form>
 
+          {/* Cross-link to the other auth mode */}
+          <div className="mt-6 pt-6 border-t border-cyan-500/10 text-center">
+            <p className="text-xs text-slate-400 mb-3">
+              {isRegister
+                ? "Already have an account?"
+                : "Don't have an account yet?"}
+            </p>
+            <Button
+              onClick={() => setView(isRegister ? "login" : "register")}
+              variant="outline"
+              className="w-full border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10"
+            >
+              {isRegister ? "Go to Sign In" : "Go to Register"}
+            </Button>
+          </div>
+
           <div className="mt-6 pt-6 border-t border-cyan-500/10 space-y-2">
             <div className="flex items-center gap-2 text-[11px] text-slate-400">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-              Passwords are bcrypt-hashed (12 rounds). Never stored in plaintext.
+              Passwords are bcrypt-hashed (10 rounds). Never stored in plaintext.
             </div>
             <div className="flex items-center gap-2 text-[11px] text-slate-400">
               <Lock className="h-3.5 w-3.5 text-cyan-400" />

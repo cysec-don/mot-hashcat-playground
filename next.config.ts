@@ -10,8 +10,11 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // L15: disable source maps in production to prevent source code leakage
   productionBrowserSourceMaps: false,
-  // H4: limit request body size — enforced at the application layer in parseJsonObjectBody
-  // (Next.js 16 doesn't expose a config-level bodySizeLimit for App Router; we cap in code)
+  // Fix Prisma client module resolution error with Turbopack.
+  // This tells Next.js to NOT bundle @prisma/client and instead resolve it
+  // at runtime from node_modules, preventing the "Cannot find module
+  // '@prisma/client-<hash>'" error.
+  serverExternalPackages: ["@prisma/client", "@prisma/client/runtime", ".prisma/client"],
 };
 
 export default nextConfig;

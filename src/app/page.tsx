@@ -50,7 +50,7 @@ export default function Home() {
       "admin",
     ];
     if (!student && protectedViews.includes(view)) {
-      setView("auth");
+      setView("login");
       // Show toast once per redirect cycle
       if (!toastShownRef.current) {
         import("sonner").then(({ toast }) => {
@@ -76,7 +76,8 @@ export default function Home() {
       <Navbar />
       <main className="flex-1">
         {view === "landing" && <LandingPage />}
-        {view === "auth" && <AuthView />}
+        {view === "register" && <AuthView mode="register" />}
+        {view === "login" && <AuthView mode="login" />}
         {view === "dashboard" && student && <DashboardView />}
         {view === "challenges" && student && <ChallengesView />}
         {view === "challenge-detail" && student && <ChallengeDetailView />}

@@ -3,7 +3,8 @@ import { create } from "zustand";
 
 export type ViewKey =
   | "landing"
-  | "auth"
+  | "register"
+  | "login"
   | "dashboard"
   | "challenges"
   | "challenge-detail"

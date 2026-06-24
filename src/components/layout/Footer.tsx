@@ -41,7 +41,7 @@ export function Footer() {
             <ul className="space-y-2 text-xs text-slate-400">
               <li>
                 <button
-                  onClick={() => setView(student ? "challenges" : "auth")}
+                  onClick={() => setView(student ? "challenges" : "register")}
                   className="hover:text-cyan-300 transition"
                 >
                   Challenges
@@ -49,7 +49,7 @@ export function Footer() {
               </li>
               <li>
                 <button
-                  onClick={() => setView(student ? "playground" : "auth")}
+                  onClick={() => setView(student ? "playground" : "register")}
                   className="hover:text-cyan-300 transition"
                 >
                   Playground
@@ -57,7 +57,7 @@ export function Footer() {
               </li>
               <li>
                 <button
-                  onClick={() => setView(student ? "leaderboard" : "auth")}
+                  onClick={() => setView(student ? "leaderboard" : "register")}
                   className="hover:text-cyan-300 transition"
                 >
                   Leaderboard
