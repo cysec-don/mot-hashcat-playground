@@ -5,8 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 // ============ Password hashing ============
 // Reduced from 12 to 10 rounds per pentest recommendation (still strong, half the CPU cost)
 const SALT_ROUNDS = 10;
-const BCRYPT_MAX_BYTES = 72; // bcrypt truncates at 72 bytes
-const PASSWORD_MAX_CHARS = 128; // app-level cap, well above 72 bytes for any charset
+const PASSWORD_MAX_CHARS = 128; // app-level cap, well above bcrypt's 72-byte truncation
 
 // Precomputed dummy hash for timing-equalization on bad-credential login path.
 // Generated once with bcrypt.hash("dummy", 10). Prevents CPU exhaustion DoS
@@ -146,9 +145,10 @@ export function validateFullName(name: string): {
     return { ok: false, error: "Full Name must be at least 2 characters." };
   }
 
-  // Latin letters, spaces, hyphens, apostrophes, periods only (M2 — reject homoglyphs)
-  // This rejects Cyrillic, Greek, etc. that look like Latin letters
-  if (!/^[A-Za-z][A-Za-z'\-\. ]*[A-Za-z]$/i.test(trimmed) && !/^[A-Za-z]$/i.test(trimmed)) {
+  // Latin letters, spaces, hyphens, apostrophes, periods only (M2 — reject homoglyphs).
+  // Must start and end with a letter. Min 2 chars (validated above).
+  // This rejects Cyrillic, Greek, etc. that look like Latin letters.
+  if (!/^[A-Za-z][A-Za-z'\-\. ]*[A-Za-z]$/.test(trimmed)) {
     return {
       ok: false,
       error:
@@ -156,12 +156,12 @@ export function validateFullName(name: string): {
     };
   }
 
-  // Reject names that are all whitespace between letters (no "A  B")
+  // Reject names with consecutive spaces (no "A  B")
   if (/\s{2,}/.test(trimmed)) {
     return { ok: false, error: "Full Name cannot contain consecutive spaces." };
   }
 
-  // Normalize: collapse whitespace, title-case for uniqueness comparison
+  // Normalize: collapse multiple spaces to single space
   const normalized = trimmed.replace(/\s+/g, " ");
   return { ok: true, normalized };
 }

@@ -65,10 +65,10 @@ export async function POST(req: NextRequest) {
 
   const action = body.action;
   if (action === "register") {
-    return handleRegister(req, body);
+    return handleRegister(body);
   }
   if (action === "login") {
-    return handleLogin(req, body);
+    return handleLogin(body);
   }
   if (action === "logout") {
     return handleLogout(req);
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
   );
 }
 
-async function handleRegister(req: NextRequest, body: Record<string, unknown>) {
+async function handleRegister(body: Record<string, unknown>) {
   // Validate types first
   if (typeof body.fullName !== "string" || typeof body.password !== "string") {
     return NextResponse.json(
@@ -169,7 +169,7 @@ async function handleRegister(req: NextRequest, body: Record<string, unknown>) {
   });
 }
 
-async function handleLogin(req: NextRequest, body: Record<string, unknown>) {
+async function handleLogin(body: Record<string, unknown>) {
   if (typeof body.fullName !== "string" || typeof body.password !== "string") {
     return NextResponse.json(
       { error: "Full Name and password are required." },

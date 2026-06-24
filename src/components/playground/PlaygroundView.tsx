@@ -94,6 +94,16 @@ export function PlaygroundView() {
     }
   }, [lines]);
 
+  // Cleanup interval on unmount to prevent state updates on unmounted component
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, []);
+
   // Set hashcat mode based on hashType
   useEffect(() => {
     const m = HASHCAT_MODES.find((x) => x.name === hashType);

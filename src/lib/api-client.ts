@@ -1,6 +1,8 @@
 // Client-side authenticated fetch helper
 // Automatically attaches Bearer token and CSRF header
 
+import { useSession } from "@/lib/store";
+
 export interface ApiFetchOptions extends RequestInit {
   body?: unknown;
 }
@@ -35,12 +37,14 @@ export async function apiFetch(
 
   const res = await fetch(url, finalOpts);
 
-  // If we got 401, the token is invalid — clear session
+  // If we got 401, the token is invalid — clear session and redirect
   if (res.status === 401 && typeof window !== "undefined") {
     localStorage.removeItem("mot-token");
     localStorage.removeItem("mot-csrf");
     localStorage.removeItem("mot-hashcat-session");
-    // Reload to landing
+    // Clear the Zustand store so the UI updates immediately
+    useSession.getState().setStudent(null);
+    // Reload to clear all client state
     if (window.location.pathname !== "/") {
       window.location.href = "/";
     }

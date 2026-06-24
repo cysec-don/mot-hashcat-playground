@@ -78,7 +78,7 @@ export function CertificateView() {
         completionPercent: certificates[0].completionPercent,
       });
       toast.success("Certificate PDF downloaded");
-    } catch (e) {
+    } catch {
       toast.error("Failed to generate PDF");
     } finally {
       setDownloading(false);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useApp, useSession } from "@/lib/store";
 import { CyberGridBackground } from "@/components/layout/CyberGridBackground";
 import { Navbar } from "@/components/layout/Navbar";
@@ -16,16 +16,14 @@ import { AchievementsView } from "@/components/achievements/AchievementsView";
 import { CertificateView } from "@/components/certificate/CertificateView";
 import { VerifyView } from "@/components/verify/VerifyView";
 import { AdminView } from "@/components/admin/AdminView";
-import { toast } from "sonner";
 
 export default function Home() {
   const { view, setView } = useApp();
   const { student, setStudent } = useSession();
+  const toastShownRef = useRef(false);
 
-  // Auto-redirect to dashboard if logged in and on landing
-  // (only on first mount, not on intentional navigation)
+  // Restore session from localStorage on first mount
   useEffect(() => {
-    // Restore session from localStorage if any
     const stored = localStorage.getItem("mot-hashcat-session");
     if (stored) {
       try {
@@ -33,16 +31,37 @@ export default function Home() {
         if (parsed?.state?.student) {
           setStudent(parsed.state.student);
         }
-      } catch {}
+      } catch {
+        // Invalid session JSON — clear it
+        localStorage.removeItem("mot-hashcat-session");
+      }
     }
   }, [setStudent]);
 
-  // Route guard - if not logged in and trying to access protected views, redirect to auth
+  // Route guard: redirect to auth if accessing a protected view without a session
   useEffect(() => {
-    const protectedViews = ["dashboard", "challenges", "challenge-detail", "playground", "certificate", "admin"];
+    const protectedViews = [
+      "dashboard",
+      "challenges",
+      "challenge-detail",
+      "playground",
+      "achievements",
+      "certificate",
+      "admin",
+    ];
     if (!student && protectedViews.includes(view)) {
-      toast.info("Please sign in to continue.");
       setView("auth");
+      // Show toast once per redirect cycle
+      if (!toastShownRef.current) {
+        import("sonner").then(({ toast }) => {
+          toast.info("Please sign in to continue.");
+        });
+        toastShownRef.current = true;
+      }
+    }
+    // Reset the toast flag when student becomes available
+    if (student) {
+      toastShownRef.current = false;
     }
   }, [student, view, setView]);
 
