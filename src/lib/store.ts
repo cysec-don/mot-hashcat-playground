@@ -58,7 +58,20 @@ export const useSession = createPersist<SessionState>()(
     (set) => ({
       student: null,
       setStudent: (s) => set({ student: s }),
-      logout: () => set({ student: null }),
+      logout: () => {
+        // Best-effort server logout (don't block UI on it)
+        const token = typeof window !== "undefined" ? localStorage.getItem("mot-token") : null;
+        if (token) {
+          fetch("/api/auth", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "logout" }),
+          }).catch(() => {});
+          localStorage.removeItem("mot-token");
+          localStorage.removeItem("mot-csrf");
+        }
+        set({ student: null });
+      },
       updateXp: (xp) =>
         set((state) =>
           state.student ? { student: { ...state.student, xp } } : state

@@ -1,9 +1,10 @@
 // Challenge progress + answer verification
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getStudentFromRequest } from "../auth/route";
+import { getStudentFromRequest, validateCSRF } from "../auth/route";
 import { CHALLENGES, getChallenge } from "@/lib/challenges-data";
 import { ACHIEVEMENTS, RANKS, getRankByXp } from "@/lib/achievements-data";
+import { rateLimit, rateLimitResponse, sanitizeString } from "@/lib/security";
 
 // GET /api/progress — returns challenge list with completion status
 export async function GET(req: NextRequest) {
@@ -40,26 +41,54 @@ export async function POST(req: NextRequest) {
   if (!student) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  if (!validateCSRF(req)) {
+    return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
+  }
 
-  const body = await req.json();
-  const { challengeId, answer, hintsUsed = 0 } = body;
+  // Rate limit: 30 submissions per minute per IP
+  const rl = rateLimit(req, { windowMs: 60_000, maxRequests: 30 });
+  if (!rl.allowed) {
+    return rateLimitResponse(rl.retryAfter);
+  }
+
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const { challengeId, answer, hintsUsed = 0 } = body as {
+    challengeId?: number;
+    answer?: string;
+    hintsUsed?: number;
+  };
+
+  if (!challengeId || typeof challengeId !== "number") {
+    return NextResponse.json({ error: "Invalid challengeId" }, { status: 400 });
+  }
+  if (typeof answer !== "string" || answer.length === 0 || answer.length > 1000) {
+    return NextResponse.json({ error: "Invalid answer" }, { status: 400 });
+  }
+  if (typeof hintsUsed !== "number" || hintsUsed < 0 || hintsUsed > 3) {
+    return NextResponse.json({ error: "Invalid hintsUsed" }, { status: 400 });
+  }
 
   const challenge = getChallenge(Number(challengeId));
   if (!challenge) {
     return NextResponse.json({ error: "Challenge not found" }, { status: 404 });
   }
 
+  const sanitizedAnswer = sanitizeString(answer, 200);
+
   // Check correctness based on question type
   let correct = false;
   if (challenge.questionType === "crack") {
     correct =
-      typeof answer === "string" &&
-      answer.trim().toLowerCase() === (challenge.expectedAnswer ?? "").toLowerCase();
+      sanitizedAnswer.toLowerCase() ===
+      (challenge.expectedAnswer ?? "").toLowerCase();
   } else {
-    // identify/strategy/command — match expected option label
-    correct =
-      typeof answer === "string" &&
-      answer.trim() === challenge.expectedOption;
+    correct = sanitizedAnswer === challenge.expectedOption;
   }
 
   // Find or create result record
@@ -101,7 +130,6 @@ export async function POST(req: NextRequest) {
     });
 
     if (newlyCompleted) {
-      // Award XP
       await db.student.update({
         where: { id: student.id },
         data: { xp: { increment: challenge.xp } },
@@ -116,7 +144,6 @@ export async function POST(req: NextRequest) {
         },
       });
     } else {
-      // Log attempt
       await db.activityLog.create({
         data: {
           studentId: student.id,
@@ -209,9 +236,21 @@ export async function PATCH(req: NextRequest) {
   if (!student) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  if (!validateCSRF(req)) {
+    return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
+  }
 
-  const body = await req.json();
-  const { challengeId } = body;
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const { challengeId } = body as { challengeId?: number };
+  if (!challengeId || typeof challengeId !== "number") {
+    return NextResponse.json({ error: "Invalid challengeId" }, { status: 400 });
+  }
 
   let result = await db.challengeResult.findUnique({
     where: {

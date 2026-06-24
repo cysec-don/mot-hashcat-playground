@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/tabs";
 import { WORDLISTS, RULES, MASK_PRESETS, MASK_CHARSET_LEGEND, ATTACK_MODES, HASHCAT_MODES } from "@/lib/hashcat-data";
 import { toast } from "sonner";
+import { apiFetch } from "@/lib/api-client";
 
 type Phase = "idle" | "running" | "complete";
 
@@ -192,28 +193,21 @@ export function PlaygroundView() {
           addLine("info", `Time.Elapsed.....: ${(realDurationMs / 1000).toFixed(2)}s`);
 
           // Log to server
-          const token = localStorage.getItem("mot-token");
-          if (token) {
-            fetch("/api/playground", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                hashType,
-                attackMode: ATTACK_MODES.find((a) => a.mode === attackMode)?.name ?? "Straight",
-                wordlist: wordlist,
-                rules: rules || null,
-                mask: attackMode === 3 ? mask : null,
-                command: cmd,
-                recovered: true,
-                duration: realDurationMs / 1000,
-              }),
-            }).then(() => {
-              toast.success("+10 XP for playground session");
-            }).catch(() => {});
-          }
+          apiFetch("/api/playground", {
+            method: "POST",
+            body: {
+              hashType,
+              attackMode: ATTACK_MODES.find((a) => a.mode === attackMode)?.name ?? "Straight",
+              wordlist: wordlist,
+              rules: rules || null,
+              mask: attackMode === 3 ? mask : null,
+              command: cmd,
+              recovered: true,
+              duration: realDurationMs / 1000,
+            },
+          })
+            .then(() => toast.success("+10 XP for playground session"))
+            .catch(() => {});
         }
         return next;
       });
@@ -246,10 +240,9 @@ export function PlaygroundView() {
     setChatLoading(true);
 
     try {
-      const res = await fetch("/api/playground-tutor", {
+      const res = await apiFetch("/api/playground-tutor", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: {
           question: userMsg,
           context: {
             hashType,
@@ -260,7 +253,7 @@ export function PlaygroundView() {
             recovered,
             command: buildCommand(),
           },
-        }),
+        },
       });
       const data = await res.json();
       setChatMessages((prev) => [

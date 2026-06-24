@@ -1,5 +1,4 @@
-// Quick script to mark all challenges complete for a test student
-// Run with: bun /home/z/my-project/scripts/mark-complete.ts
+// Quick script to mark all challenges complete for the test student
 import { db } from "../src/lib/db";
 import { CHALLENGES } from "../src/lib/challenges-data";
 
@@ -13,7 +12,6 @@ async function main() {
   }
   console.log(`Found student: ${student.fullName} (${student.id})`);
 
-  // Mark all 20 challenges complete
   for (const c of CHALLENGES) {
     const existing = await db.challengeResult.findUnique({
       where: {
@@ -35,7 +33,6 @@ async function main() {
           completedAt: new Date(),
         },
       });
-      // Award XP only for newly completed
       await db.student.update({
         where: { id: student.id },
         data: { xp: { increment: c.xp } },

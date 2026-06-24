@@ -36,6 +36,7 @@ import { Label } from "@/components/ui/label";
 import { getChallenge, CHALLENGES } from "@/lib/challenges-data";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { apiFetch } from "@/lib/api-client";
 
 const DIFFICULTY_COLOR: Record<string, string> = {
   Beginner: "#00FF88",
@@ -89,8 +90,6 @@ export function ChallengeDetailView() {
 
   const handleSubmit = async () => {
     if (!student) return;
-    const token = localStorage.getItem("mot-token");
-    if (!token) return;
 
     const userAnswer =
       challenge.questionType === "crack" ? answer.trim() : selectedOption;
@@ -102,17 +101,13 @@ export function ChallengeDetailView() {
 
     setSubmitting(true);
     try {
-      const res = await fetch("/api/progress", {
+      const res = await apiFetch("/api/progress", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+        body: {
           challengeId: challenge.id,
           answer: userAnswer,
           hintsUsed: effectiveHintsUsed,
-        }),
+        },
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Submission failed");
@@ -145,17 +140,10 @@ export function ChallengeDetailView() {
   const useHint = async () => {
     if (hintsUsed >= 3) return;
     setHintsUsed(hintsUsed + 1);
-    const token = localStorage.getItem("mot-token");
-    if (token) {
-      fetch("/api/progress", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ challengeId: challenge.id }),
-      }).catch(() => {});
-    }
+    apiFetch("/api/progress", {
+      method: "PATCH",
+      body: { challengeId: challenge.id },
+    }).catch(() => {});
   };
 
   const nextChallenge = CHALLENGES.find((c) => c.id === challenge.id + 1);

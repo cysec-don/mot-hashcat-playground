@@ -27,7 +27,6 @@ import { Badge } from "@/components/ui/badge";
 import { CHALLENGES, MODULES } from "@/lib/challenges-data";
 import { ACHIEVEMENTS, RANKS } from "@/lib/achievements-data";
 import { Skeleton } from "@/components/ui/skeleton";
-import Link from "next/link";
 import * as LucideIcons from "lucide-react";
 
 export function DashboardView() {

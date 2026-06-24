@@ -16,16 +16,30 @@ import {
   Lock,
   Sparkles,
   AlertCircle,
+  Eye,
+  EyeOff,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
+
+type Mode = "register" | "login";
 
 export function AuthView() {
   const { setView } = useApp();
   const { setStudent } = useSession();
+  const [mode, setMode] = useState<Mode>("register");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const switchMode = (m: Mode) => {
+    setMode(m);
+    setError(null);
+    setPassword("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,9 +50,26 @@ export function AuthView() {
       return;
     }
 
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Please enter a valid email address.");
-      return;
+    if (mode === "register") {
+      if (password.length < 8) {
+        setError("Password must be at least 8 characters.");
+        return;
+      }
+      if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password) || !/[^a-zA-Z0-9]/.test(password)) {
+        setError(
+          "Password must include upper & lower case letters, a digit, and a special character."
+        );
+        return;
+      }
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setError("Please enter a valid email address.");
+        return;
+      }
+    } else {
+      if (!password) {
+        setError("Password is required.");
+        return;
+      }
     }
 
     setLoading(true);
@@ -47,8 +78,10 @@ export function AuthView() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          action: mode,
           fullName: fullName.trim(),
-          email: email.trim() || undefined,
+          email: mode === "register" && email ? email.trim() : undefined,
+          password,
         }),
       });
       const data = await res.json();
@@ -66,7 +99,12 @@ export function AuthView() {
       };
       setStudent(student);
       localStorage.setItem("mot-token", data.token);
-      toast.success(`Welcome aboard, ${student.fullName}!`);
+      localStorage.setItem("mot-csrf", data.csrf);
+      toast.success(
+        mode === "register"
+          ? `Account created — welcome aboard, ${student.fullName}!`
+          : `Welcome back, ${student.fullName}!`
+      );
       setView("dashboard");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Authentication failed.";
@@ -98,11 +136,47 @@ export function AuthView() {
               <Terminal className="h-7 w-7 text-cyan-400" />
             </div>
             <h1 className="text-2xl font-bold text-white">
-              Enter the <span className="cyber-gradient-text">Playground</span>
+              {mode === "register" ? (
+                <>
+                  Create your <span className="cyber-gradient-text">account</span>
+                </>
+              ) : (
+                <>
+                  Sign in to <span className="cyber-gradient-text">Playground</span>
+                </>
+              )}
             </h1>
             <p className="mt-2 text-sm text-slate-400">
-              Sign in with your Full Name to begin your Hashcat journey.
+              {mode === "register"
+                ? "Register with your Full Name and a strong password."
+                : "Welcome back. Sign in with your Full Name and password."}
             </p>
+          </div>
+
+          {/* Mode toggle */}
+          <div className="grid grid-cols-2 gap-1 p-1 mb-5 rounded-lg bg-[#0B0F19] border border-cyan-500/15">
+            <button
+              type="button"
+              onClick={() => switchMode("register")}
+              className={`py-2 text-xs font-medium rounded-md transition ${
+                mode === "register"
+                  ? "bg-cyan-400/15 text-cyan-300 border border-cyan-400/30"
+                  : "text-slate-400 hover:text-cyan-300"
+              }`}
+            >
+              Register
+            </button>
+            <button
+              type="button"
+              onClick={() => switchMode("login")}
+              className={`py-2 text-xs font-medium rounded-md transition ${
+                mode === "login"
+                  ? "bg-cyan-400/15 text-cyan-300 border border-cyan-400/30"
+                  : "text-slate-400 hover:text-cyan-300"
+              }`}
+            >
+              Sign In
+            </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -120,29 +194,66 @@ export function AuthView() {
                   placeholder="e.g. Satoshi Nakamoto"
                   className="pl-10 bg-[#0B0F19] border-cyan-500/25 text-white placeholder:text-slate-600 focus:border-cyan-400"
                   required
+                  autoComplete="name"
                   autoFocus
                 />
               </div>
               <p className="text-[11px] text-slate-500">
-                This exact name will appear on your certificate and leaderboard entry.
+                This exact name appears on your certificate and leaderboard entry.
               </p>
             </div>
 
+            {mode === "register" && (
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-xs text-slate-300 font-medium">
+                  Email <span className="text-slate-500">(optional)</span>
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="pl-10 bg-[#0B0F19] border-cyan-500/25 text-white placeholder:text-slate-600 focus:border-cyan-400"
+                    autoComplete="email"
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-xs text-slate-300 font-medium">
-                Email <span className="text-slate-500">(optional)</span>
+              <Label htmlFor="password" className="text-xs text-slate-300 font-medium">
+                Password <span className="text-rose-400">*</span>
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                 <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="pl-10 bg-[#0B0F19] border-cyan-500/25 text-white placeholder:text-slate-600 focus:border-cyan-400"
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={mode === "register" ? "Min 8 chars, mixed classes" : "Your password"}
+                  className="pl-10 pr-10 bg-[#0B0F19] border-cyan-500/25 text-white placeholder:text-slate-600 focus:border-cyan-400"
+                  required
+                  autoComplete={mode === "register" ? "new-password" : "current-password"}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-cyan-300 transition"
+                  tabIndex={-1}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
+              {mode === "register" && (
+                <p className="text-[11px] text-slate-500">
+                  Min 8 chars · include upper &amp; lower case, a digit, and a special character.
+                </p>
+              )}
             </div>
 
             {error && (
@@ -159,12 +270,12 @@ export function AuthView() {
             >
               {loading ? (
                 <>
-                  <Sparkles className="h-4 w-4 mr-2 animate-spin" />
-                  Authenticating...
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {mode === "register" ? "Creating account..." : "Signing in..."}
                 </>
               ) : (
                 <>
-                  Enter Playground
+                  {mode === "register" ? "Create Account" : "Sign In"}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </>
               )}
@@ -174,7 +285,7 @@ export function AuthView() {
           <div className="mt-6 pt-6 border-t border-cyan-500/10 space-y-2">
             <div className="flex items-center gap-2 text-[11px] text-slate-400">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-              No passwords. No usernames. Just your Full Name.
+              Passwords are bcrypt-hashed (12 rounds). Never stored in plaintext.
             </div>
             <div className="flex items-center gap-2 text-[11px] text-slate-400">
               <Lock className="h-3.5 w-3.5 text-cyan-400" />
@@ -184,7 +295,7 @@ export function AuthView() {
         </div>
 
         <p className="mt-6 text-center text-[11px] text-slate-500">
-          By signing in, you agree to use this platform for educational purposes only.
+          By continuing, you agree to use this platform for educational purposes only.
         </p>
       </motion.div>
     </div>

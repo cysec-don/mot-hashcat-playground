@@ -15,12 +15,26 @@ import {
   Loader2,
   Search,
   BarChart3,
+  ShieldCheck,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { apiFetch } from "@/lib/api-client";
 import {
   BarChart,
   Bar,
@@ -72,20 +86,13 @@ export function AdminView() {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    const token = localStorage.getItem("mot-token");
-    if (!token) {
-      return;
-    }
     Promise.all([
-      fetch(`/api/admin?action=students`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then((r) => r.json()),
-      fetch(`/api/admin?action=analytics`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then((r) => r.json()),
+      apiFetch(`/api/admin?action=students`).then((r) => r.json()),
+      apiFetch(`/api/admin?action=analytics`).then((r) => r.json()),
     ])
       .then(([s, a]) => {
         if (cancelled) return;
@@ -103,16 +110,10 @@ export function AdminView() {
 
   const handleReset = async (studentId: string, name: string) => {
     if (!confirm(`Reset progress for ${name}? This cannot be undone.`)) return;
-    const token = localStorage.getItem("mot-token");
-    if (!token) return;
     try {
-      const res = await fetch("/api/admin", {
+      const res = await apiFetch("/api/admin", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ action: "reset-progress", studentId }),
+        body: { action: "reset-progress", studentId },
       });
       if (res.ok) {
         toast.success(`Progress reset for ${name}`);
@@ -198,7 +199,7 @@ export function AdminView() {
       </motion.div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6">
         {[
           { key: "overview", label: "Overview", icon: Activity },
           { key: "students", label: "Students", icon: Users },
@@ -220,6 +221,15 @@ export function AdminView() {
             </button>
           );
         })}
+        <Dialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen}>
+          <DialogTrigger asChild>
+            <button className="flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-medium transition text-emerald-300 border border-emerald-400/30 bg-emerald-400/10 hover:bg-emerald-400/20">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Verify Certificate
+            </button>
+          </DialogTrigger>
+          <CertificateVerifyDialog onClose={() => setVerifyDialogOpen(false)} />
+        </Dialog>
       </div>
 
       {tab === "overview" && overview && (
@@ -444,5 +454,145 @@ function StatBox({
         {label}
       </div>
     </Card>
+  );
+}
+
+function CertificateVerifyDialog({ onClose }: { onClose: () => void }) {
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<{
+    valid: boolean;
+    error?: string;
+    certificate?: {
+      certificateId: string;
+      verificationNumber: string;
+      studentName: string;
+      issuedAt: string;
+      completionPercent: number;
+    };
+  } | null>(null);
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+    setLoading(true);
+    setResult(null);
+    try {
+      const res = await fetch(`/api/verify/${encodeURIComponent(query.trim())}`);
+      const data = await res.json();
+      setResult(data);
+    } catch {
+      setResult({ valid: false, error: "Failed to verify. Please try again." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <DialogContent className="max-w-md bg-[#111827] border-cyan-500/30 text-white">
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2 text-white">
+          <ShieldCheck className="h-5 w-5 text-emerald-400" />
+          Verify Certificate
+        </DialogTitle>
+        <DialogDescription className="text-slate-400">
+          Check whether a certificate was issued by this platform. Accepts
+          Certificate ID, Verification Number, or student Full Name.
+        </DialogDescription>
+      </DialogHeader>
+
+      <form onSubmit={handleVerify} className="space-y-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="cert-query" className="text-xs text-slate-300">
+            Certificate ID / Verification # / Full Name
+          </Label>
+          <Input
+            id="cert-query"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="e.g. MOT-ABCD1234 or Satoshi Nakamoto"
+            className="bg-[#0B0F19] border-cyan-500/25 text-white font-mono"
+            autoFocus
+          />
+        </div>
+        <Button
+          type="submit"
+          disabled={loading || !query.trim()}
+          className="w-full bg-gradient-to-r from-emerald-400 to-cyan-400 text-[#0B0F19] hover:from-emerald-300 hover:to-cyan-300 font-bold"
+        >
+          {loading ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <ShieldCheck className="h-4 w-4 mr-2" />
+          )}
+          Verify
+        </Button>
+      </form>
+
+      {result && (
+        <div
+          className={`rounded-lg border p-4 ${
+            result.valid
+              ? "border-emerald-500/40 bg-emerald-500/5"
+              : "border-rose-500/40 bg-rose-500/5"
+          }`}
+        >
+          {result.valid && result.certificate ? (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                <span className="text-sm font-bold text-emerald-300">
+                  Authentic — Issued by this platform
+                </span>
+              </div>
+              <div className="space-y-1.5 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Recipient:</span>
+                  <span className="text-white font-medium">{result.certificate.studentName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Certificate ID:</span>
+                  <span className="text-cyan-300 font-mono">{result.certificate.certificateId}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Verification #:</span>
+                  <span className="text-emerald-300 font-mono">{result.certificate.verificationNumber}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Issued:</span>
+                  <span className="text-slate-300">
+                    {new Date(result.certificate.issuedAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Completion:</span>
+                  <span className="text-slate-300">{result.certificate.completionPercent.toFixed(0)}%</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <XCircle className="h-5 w-5 text-rose-400" />
+              <div>
+                <div className="text-sm font-bold text-rose-300">Not Found</div>
+                <div className="text-[11px] text-slate-400 mt-0.5">
+                  {result.error || "No certificate matches the query."}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <DialogFooter>
+        <Button
+          variant="outline"
+          onClick={onClose}
+          className="border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10"
+        >
+          Close
+        </Button>
+      </DialogFooter>
+    </DialogContent>
   );
 }

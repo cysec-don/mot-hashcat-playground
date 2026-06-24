@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "@/lib/store";
+import { apiFetch } from "@/lib/api-client";
 
 export interface DashboardData {
   student: {
@@ -92,15 +93,8 @@ export function useDashboardData() {
       setLoading(false);
       return;
     }
-    const token = localStorage.getItem("mot-token");
-    if (!token) {
-      setLoading(false);
-      return;
-    }
     try {
-      const res = await fetch("/api/student", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await apiFetch("/api/student");
       if (!res.ok) throw new Error("Failed to load dashboard");
       const json = await res.json();
       setData(json);

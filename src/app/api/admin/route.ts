@@ -1,9 +1,10 @@
 // Admin endpoints
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getStudentFromRequest } from "../auth/route";
+import { getStudentFromRequest, validateCSRF } from "../auth/route";
 import { CHALLENGES } from "@/lib/challenges-data";
 import { getRankByXp } from "@/lib/achievements-data";
+import { rateLimit, rateLimitResponse } from "@/lib/security";
 
 async function requireAdmin(req: NextRequest) {
   const student = await getStudentFromRequest(req);
@@ -58,7 +59,6 @@ export async function GET(req: NextRequest) {
     });
     const totalAchievementsUnlocked = await db.studentAchievement.count();
 
-    // Per-challenge completion counts
     const allResults = await db.challengeResult.findMany({
       where: { completed: true },
     });
@@ -69,7 +69,6 @@ export async function GET(req: NextRequest) {
       completions: allResults.filter((r) => r.challengeId === c.id).length,
     }));
 
-    // Top 5 students
     const topStudents = await db.student.findMany({
       orderBy: { xp: "desc" },
       take: 5,
@@ -112,25 +111,55 @@ export async function POST(req: NextRequest) {
   if (!admin) {
     return NextResponse.json({ error: "Admin access required" }, { status: 403 });
   }
+  if (!validateCSRF(req)) {
+    return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
+  }
 
-  const body = await req.json();
-  const { action, studentId } = body;
+  // Rate limit admin mutations: 30 per minute
+  const rl = rateLimit(req, { windowMs: 60_000, maxRequests: 30 });
+  if (!rl.allowed) {
+    return rateLimitResponse(rl.retryAfter);
+  }
+
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const { action, studentId } = body as { action?: string; studentId?: string };
+
+  if (typeof action !== "string" || typeof studentId !== "string") {
+    return NextResponse.json({ error: "Invalid action or studentId" }, { status: 400 });
+  }
 
   if (action === "reset-progress") {
+    // Prevent self-reset
+    if (studentId === admin.id) {
+      return NextResponse.json(
+        { error: "Cannot reset your own progress." },
+        { status: 400 }
+      );
+    }
+    // Prevent resetting other admins
+    const target = await db.student.findUnique({ where: { id: studentId } });
+    if (!target) {
+      return NextResponse.json({ error: "Student not found" }, { status: 404 });
+    }
+    if (target.isAdmin) {
+      return NextResponse.json(
+        { error: "Cannot reset another admin's progress." },
+        { status: 400 }
+      );
+    }
+
     await db.challengeResult.deleteMany({ where: { studentId } });
     await db.studentAchievement.deleteMany({ where: { studentId } });
     await db.certificate.deleteMany({ where: { studentId } });
     await db.student.update({
       where: { id: studentId },
       data: { xp: 0, rank: 1 },
-    });
-    return NextResponse.json({ ok: true });
-  }
-
-  if (action === "promote-admin") {
-    await db.student.update({
-      where: { id: studentId },
-      data: { isAdmin: true },
     });
     return NextResponse.json({ ok: true });
   }

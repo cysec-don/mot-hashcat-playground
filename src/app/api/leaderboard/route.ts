@@ -1,9 +1,15 @@
-// Leaderboard endpoint
+// Leaderboard endpoint (public, rate-limited)
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getRankByXp } from "@/lib/achievements-data";
+import { rateLimit, rateLimitResponse } from "@/lib/security";
 
 export async function GET(req: NextRequest) {
+  const rl = rateLimit(req, { windowMs: 60_000, maxRequests: 30 });
+  if (!rl.allowed) {
+    return rateLimitResponse(rl.retryAfter);
+  }
+
   const url = new URL(req.url);
   const limit = Math.min(Number(url.searchParams.get("limit") || "50"), 200);
 

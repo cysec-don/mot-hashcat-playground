@@ -21,7 +21,6 @@ import {
   Wrench,
   Sparkles,
 } from "lucide-react";
-import { useState } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -286,7 +285,7 @@ function FeaturesSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionHeader
           eyebrow="Features"
-          title="Everything you need to master Hashcat"
+          title="Everything you need to master the BASICS of Hashcat"
           subtitle="A complete cybersecurity training environment built to rival Hack The Box, TryHackMe, and OffSec."
         />
         <div className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

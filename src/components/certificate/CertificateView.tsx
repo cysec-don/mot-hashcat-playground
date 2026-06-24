@@ -22,6 +22,7 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { generateCertificatePDF } from "@/lib/certificate-pdf";
+import { apiFetch } from "@/lib/api-client";
 
 export function CertificateView() {
   const { student } = useSession();
@@ -44,21 +45,19 @@ export function CertificateView() {
 
   const handleGenerate = async () => {
     if (!student) return;
-    const token = localStorage.getItem("mot-token");
-    if (!token) return;
 
     setGenerating(true);
     try {
-      const res = await fetch("/api/certificate", {
+      const res = await apiFetch("/api/certificate", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
       });
       const json = await res.json();
       if (!res.ok) {
         throw new Error(json.error || "Failed to generate certificate");
       }
       toast.success("Certificate issued successfully!");
-      window.location.reload();
+      // Refresh dashboard data instead of full reload
+      setTimeout(() => window.location.reload(), 800);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Generation failed";
       toast.error(msg);

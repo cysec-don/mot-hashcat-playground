@@ -1,13 +1,20 @@
-// Certificate verification endpoint
+// Certificate verification endpoint (public)
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { rateLimit, rateLimitResponse } from "@/lib/security";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Rate limit: 30 verifications per minute per IP
+  const rl = rateLimit(req, { windowMs: 60_000, maxRequests: 30 });
+  if (!rl.allowed) {
+    return rateLimitResponse(rl.retryAfter);
+  }
+
   const { id: query } = await params;
-  const decoded = decodeURIComponent(query).trim();
+  const decoded = decodeURIComponent(query).trim().slice(0, 200);
 
   if (!decoded) {
     return NextResponse.json({ valid: false, error: "No ID provided" });
