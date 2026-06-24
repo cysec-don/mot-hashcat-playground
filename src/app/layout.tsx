@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://github.com/cysec-don/mot-hashcat-playground"),
   title: "MOT Hashcat Playground — Master Password Recovery & Hashcat",
   description:
     "MOT Hashcat Playground — an elite cybersecurity training platform for mastering Hashcat, password recovery, MD5/SHA1/SHA2-256 cracking, and simulated wallet.dat analysis. 20 guided labs, interactive cyber range, professional certification.",
@@ -30,11 +31,16 @@ export const metadata: Metadata = {
     "Certification",
   ],
   authors: [{ name: "MOT Hashcat Playground" }],
+  icons: {
+    icon: "/mot-logo.jpg",
+    apple: "/mot-logo.jpg",
+  },
   openGraph: {
     title: "MOT Hashcat Playground",
     description:
       "Master Password Recovery. Master Hashcat. Master the Art of Cracking.",
     type: "website",
+    images: ["/mot-logo.jpg"],
   },
 };
 

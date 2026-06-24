@@ -70,6 +70,15 @@ function HeroSection() {
             </span>
           </div>
 
+          {/* Logo */}
+          <div className="mb-6 flex justify-center">
+            <img
+              src="/mot-logo.jpg"
+              alt="MOT Hashcat Playground"
+              className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl object-cover border-2 border-cyan-400/30 pulse-glow"
+            />
+          </div>
+
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white">
             MOT <span className="cyber-gradient-text">Hashcat</span>
             <br />

@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Terminal,
   User,
   Mail,
   ArrowRight,
@@ -132,8 +131,12 @@ export function AuthView() {
 
         <div className="cyber-card rounded-2xl p-8 scanline">
           <div className="text-center mb-6">
-            <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-cyan-400/15 border border-cyan-400/30 mb-4 pulse-glow">
-              <Terminal className="h-7 w-7 text-cyan-400" />
+            <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl overflow-hidden border border-cyan-400/30 mb-4 pulse-glow">
+              <img
+                src="/mot-logo.jpg"
+                alt="MOT Hashcat Playground"
+                className="h-full w-full object-cover"
+              />
             </div>
             <h1 className="text-2xl font-bold text-white">
               {mode === "register" ? (

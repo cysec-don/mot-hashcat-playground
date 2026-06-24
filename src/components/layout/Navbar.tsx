@@ -46,9 +46,13 @@ export function Navbar() {
           onClick={() => setView(student ? "dashboard" : "landing")}
           className="flex items-center gap-2.5 group"
         >
-          <div className="relative flex h-9 w-9 items-center justify-center rounded-md bg-gradient-to-br from-cyan-400/20 to-emerald-400/10 border border-cyan-400/30">
-            <Terminal className="h-5 w-5 text-cyan-400" />
-            <div className="absolute inset-0 rounded-md pulse-glow opacity-50" />
+          <div className="relative flex h-9 w-9 items-center justify-center rounded-md overflow-hidden border border-cyan-400/30">
+            <img
+              src="/mot-logo.jpg"
+              alt="MOT Hashcat Playground Logo"
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 rounded-md pulse-glow opacity-50 pointer-events-none" />
           </div>
           <div className="flex flex-col leading-none">
             <span className="text-sm font-bold tracking-tight text-white">

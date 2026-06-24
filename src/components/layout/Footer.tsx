@@ -1,7 +1,7 @@
 "use client";
 
 import { useApp, useSession } from "@/lib/store";
-import { Terminal, Shield, Github, Twitter, Mail } from "lucide-react";
+import { Shield, Github, Twitter, Mail } from "lucide-react";
 
 export function Footer() {
   const { setView } = useApp();
@@ -13,8 +13,12 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded bg-cyan-400/15 border border-cyan-400/30">
-                <Terminal className="h-4 w-4 text-cyan-400" />
+              <div className="flex h-7 w-7 items-center justify-center rounded overflow-hidden border border-cyan-400/30">
+                <img
+                  src="/mot-logo.jpg"
+                  alt="MOT Hashcat Playground"
+                  className="h-full w-full object-cover"
+                />
               </div>
               <span className="text-sm font-bold text-white">
                 MOT <span className="cyber-gradient-text">Hashcat</span>
