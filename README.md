@@ -56,6 +56,8 @@ The platform features a flagship **Hashcat Playground** — an interactive cyber
 - **Premium PDF Certification** — Luxury gold-bordered certificate with embossed seal, binary watermark, QR-verifiable ID, and dual signature lines
 - **Certificate Verification Portal** — Public lookup by Certificate ID or Verification Number
 - **Admin Panel** — Student management, CSV export, analytics dashboard with per-challenge completion charts
+- **Separate Register & Login** — Distinct registration and sign-in pages, each with its own button in the navbar and on the landing page
+- **Custom Branding** — MOT logo integrated in navbar, footer, auth pages, landing hero, and browser favicon
 - **Authentication** — Register + login with bcrypt-hashed passwords, CSRF protection, opaque session tokens
 
 ### Security Hardened
@@ -67,6 +69,7 @@ The platform features a flagship **Hashcat Playground** — an interactive cyber
 - Body size limits (64 KB)
 - Opaque session tokens (no embedded user data)
 - Case-insensitive username uniqueness with Latin-only character validation
+- Prisma configured as server-external package (prevents Turbopack bundling errors)
 
 ---
 
@@ -237,6 +240,8 @@ bun install
 npm install
 ```
 
+> **Note**: The `postinstall` script automatically runs `prisma generate` after dependencies are installed. This creates the Prisma client library needed by the app. If it doesn't run automatically, execute `bun run db:generate` manually.
+
 #### Step 5: Configure Environment
 
 ```bash
@@ -252,14 +257,12 @@ cp .env.example .env
 #### Step 6: Initialize the Database
 
 ```bash
-# Generate Prisma client
-bun run db:generate
-# OR: npx prisma generate
-
-# Create the database schema
+# Create the database schema (also regenerates the Prisma client)
 bun run db:push
 # OR: npx prisma db push
 ```
+
+> **Note**: If you see a Prisma module error like `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate` to regenerate the client. The `next.config.ts` already marks `@prisma/client` as a server-external package to prevent Turbopack bundling issues.
 
 #### Step 7: Start the Development Server
 
@@ -332,6 +335,8 @@ bun install
 npm install
 ```
 
+> **Note**: The `postinstall` script automatically runs `prisma generate` after install. If it doesn't run, execute `bun run db:generate` manually.
+
 #### Step 5: Configure Environment
 
 ```bash
@@ -341,9 +346,11 @@ cp .env.example .env
 #### Step 6: Initialize the Database
 
 ```bash
-bun run db:generate
+# Create the database schema (also regenerates the Prisma client)
 bun run db:push
 ```
+
+> **Note**: If you see a Prisma module error like `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate` to regenerate the client.
 
 #### Step 7: Start the Development Server
 
@@ -411,6 +418,8 @@ bun install
 npm install
 ```
 
+> **Note**: The `postinstall` script automatically runs `prisma generate` after install. If it doesn't run, execute `bun run db:generate` manually.
+
 #### Step 5: Configure Environment
 
 ```bash
@@ -420,9 +429,11 @@ cp .env.example .env
 #### Step 6: Initialize the Database
 
 ```bash
-bun run db:generate
+# Create the database schema (also regenerates the Prisma client)
 bun run db:push
 ```
+
+> **Note**: If you see a Prisma module error like `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate` to regenerate the client.
 
 #### Step 7: Start the Development Server
 
@@ -487,6 +498,8 @@ bun install
 npm install
 ```
 
+> **Note**: The `postinstall` script automatically runs `prisma generate` after install. If it doesn't run, execute `bun run db:generate` (or `npx prisma generate`) manually.
+
 #### Step 5: Configure Environment
 
 ```powershell
@@ -501,13 +514,13 @@ Copy-Item .env.example .env
 
 ```powershell
 # Using Bun
-bun run db:generate
 bun run db:push
 
 # OR using npm
-npx prisma generate
 npx prisma db push
 ```
+
+> **Note**: If you see a Prisma module error like `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate` (or `npx prisma generate`) to regenerate the client.
 
 #### Step 7: Start the Development Server
 
@@ -596,6 +609,8 @@ bun install
 npm install
 ```
 
+> **Note**: The `postinstall` script automatically runs `prisma generate` after install. If it doesn't run, execute `bun run db:generate` manually.
+
 #### Step 6: Configure Environment
 
 ```bash
@@ -605,9 +620,11 @@ cp .env.example .env
 #### Step 7: Initialize the Database
 
 ```bash
-bun run db:generate
+# Create the database schema (also regenerates the Prisma client)
 bun run db:push
 ```
+
+> **Note**: If you see a Prisma module error like `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate` to regenerate the client.
 
 #### Step 8: Start the Development Server
 
@@ -644,11 +661,12 @@ DATABASE_URL=file:C:/Users/username/mot-hashcat.db
 | Script | Description |
 |--------|-------------|
 | `dev` | Start the development server on port 3000 |
-| `build` | Build the production standalone bundle |
+| `build` | Generate Prisma client + build the production standalone bundle |
 | `start` | Start the production server (requires build first) |
 | `lint` | Run ESLint to check code quality |
+| `postinstall` | Automatically runs `prisma generate` after `bun install` / `npm install` |
 | `db:push` | Push the Prisma schema to the database |
-| `db:generate` | Generate the Prisma client |
+| `db:generate` | Generate the Prisma client manually |
 | `db:reset` | Reset the database (destroys all data) |
 
 ---
@@ -678,10 +696,12 @@ bun run start
 ### First Run Setup
 
 1. **Open** http://localhost:3000 in your browser
-2. **Click** "Start Learning" or "Sign In"
+2. **Click** "Get Started" (to register) or "Sign In" (if you already have an account)
+   - The navbar also has separate "Register" and "Sign In" buttons
 3. **Register** with your Full Name and a strong password
+   - Password requirements: min 8 chars, must include upper/lower case, a digit, and a special character
    - The first registered user automatically becomes the admin
-4. **Start challenges** from the Dashboard
+4. **Start challenges** from the Dashboard — begin with Module 1 (MD5)
 
 ### Admin Access
 
@@ -696,9 +716,17 @@ The first user to register is automatically granted admin privileges. Admins can
 
 ## Usage Guide
 
+### Authentication
+
+The platform has **separate Register and Login pages**:
+
+- **Register** — Click the "Register" button in the navbar or "Get Started" on the landing page. Requires Full Name, optional email, and a strong password.
+- **Sign In** — Click the "Sign In" button in the navbar or on the landing page. Requires Full Name and password.
+- Each page has a cross-link button to switch to the other if you're on the wrong one.
+
 ### For Students
 
-1. **Register** with your full name and a password (min 8 chars, must include upper/lower/digit/special)
+1. **Register** with your full name (Latin letters only) and a password (min 8 chars, must include upper/lower/digit/special)
 2. **Complete Challenges** — Start with Module 1 (MD5), progress through SHA1, SHA2-256, and Wallet.dat
 3. **Use Hints** — Each challenge has 3 progressive hints (using hints doesn't block progress)
 4. **Practice** in the Hashcat Playground — experiment with attack modes, wordlists, rules, and masks
@@ -845,7 +873,34 @@ mot-hashcat.example.com {
 
 ### Common Issues
 
-#### "Cannot find module '@prisma/client'"
+#### "Cannot find module '@prisma/client-<hash>'" (Turbopack error)
+
+This is a known Turbopack issue where Next.js tries to bundle `@prisma/client` but fails because the generated client uses dynamic requires. The error looks like:
+
+```
+Error: Failed to load external module @prisma/client-2c3a283f134fdcb6
+ResolveMessage: Cannot find module '@prisma/client-2c3a283f134fdcb6'
+```
+
+**This project already includes the fix** in `next.config.ts` via `serverExternalPackages`. If you still see the error:
+
+```bash
+# 1. Regenerate the Prisma client
+bun run db:generate
+# OR: npx prisma generate
+
+# 2. Clear the Next.js cache and restart
+rm -rf .next/cache .next/dev
+bun run dev
+```
+
+If the error persists, ensure your `next.config.ts` contains:
+
+```typescript
+serverExternalPackages: ["@prisma/client", "@prisma/client/runtime", ".prisma/client"],
+```
+
+#### "Cannot find module '@prisma/client'" (general)
 
 The Prisma client hasn't been generated. Run:
 
@@ -916,6 +971,16 @@ The rate limiter uses the socket peer IP. If you're testing rapidly from localho
 #### "Full Name may only contain Latin letters"
 
 The platform enforces Latin-only characters (A-Z, a-z) in full names to prevent homoglyph attacks. Digits, Cyrillic, Greek, and other scripts are rejected. Use letters, spaces, hyphens, apostrophes, and periods only.
+
+**Examples of accepted names:**
+- `Satoshi Nakamoto` ✅
+- `Jean-Pierre O'Brien` ✅
+- `Mary Jane` ✅
+
+**Examples of rejected names:**
+- `User123` ❌ (contains digits)
+- `Тest Operator` ❌ (contains Cyrillic Т)
+- `Test_User` ❌ (underscore not allowed)
 
 ---
 
