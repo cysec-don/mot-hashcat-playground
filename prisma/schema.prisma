@@ -1,0 +1,95 @@
+// MOT Hashcat Playground - Database Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id              String   @id @default(cuid())
+  fullName        String   @unique
+  email           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  lastActiveAt    DateTime @default(now())
+  xp              Int      @default(0)
+  rank            Int      @default(1)
+  isAdmin         Boolean  @default(false)
+
+  challengeResults ChallengeResult[]
+  achievements     StudentAchievement[]
+  certificates     Certificate[]
+  playgroundLogs   PlaygroundLog[]
+  activityLogs     ActivityLog[]
+}
+
+model ChallengeResult {
+  id           String   @id @default(cuid())
+  studentId    String
+  challengeId  Int
+  completed    Boolean  @default(false)
+  attempts     Int      @default(0)
+  hintsUsed    Int      @default(0)
+  xpEarned     Int      @default(0)
+  completedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, challengeId])
+}
+
+model StudentAchievement {
+  id           String   @id @default(cuid())
+  studentId    String
+  achievementId String
+  unlockedAt   DateTime @default(now())
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, achievementId])
+}
+
+model Certificate {
+  id                 String   @id @default(cuid())
+  studentId          String
+  certificateId      String   @unique
+  verificationNumber String   @unique
+  studentName        String
+  issuedAt           DateTime @default(now())
+  completionPercent  Float    @default(100)
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model PlaygroundLog {
+  id           String   @id @default(cuid())
+  studentId    String
+  hashType     String
+  attackMode   String
+  wordlist     String?
+  rules        String?
+  mask         String?
+  command      String
+  recovered    Boolean  @default(false)
+  duration     Float    @default(0)
+  createdAt    DateTime @default(now())
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  studentId  String
+  action     String
+  detail     String?
+  xpDelta    Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
