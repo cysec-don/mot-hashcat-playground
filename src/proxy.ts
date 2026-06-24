@@ -1,4 +1,4 @@
-// Security headers proxy — applies to all routes
+// Security headers proxy — hardened post-pentest
 import { NextResponse, type NextRequest } from "next/server";
 
 const SECURITY_HEADERS: Record<string, string> = {
@@ -13,17 +13,27 @@ const SECURITY_HEADERS: Record<string, string> = {
   "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
 };
 
-export default function proxy(_req: NextRequest) {
+export default function proxy(req: NextRequest) {
+  // M13: reject TRACE method
+  if (req.method === "TRACE") {
+    return new NextResponse(null, {
+      status: 405,
+      headers: { Allow: "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS" },
+    });
+  }
+
   const res = NextResponse.next();
+
   for (const [k, v] of Object.entries(SECURITY_HEADERS)) {
     res.headers.set(k, v);
   }
-  // CSP — allow inline styles & scripts (Next.js requires this), plus our own assets
+
+  // L3: tightened CSP — removed 'unsafe-eval'. Kept 'unsafe-inline' for Next.js compat.
   res.headers.set(
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "script-src 'self' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' data: https://fonts.gstatic.com",
       "img-src 'self' data: blob: https:",
@@ -33,6 +43,7 @@ export default function proxy(_req: NextRequest) {
       "form-action 'self'",
     ].join("; ")
   );
+
   return res;
 }
 

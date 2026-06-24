@@ -5,12 +5,17 @@ import { getStudentFromRequest } from "../auth/route";
 import { CHALLENGES } from "@/lib/challenges-data";
 import { ACHIEVEMENTS } from "@/lib/achievements-data";
 import { getRankByXp, getNextRank, RANKS } from "@/lib/achievements-data";
+import { rateLimit, rateLimitResponse } from "@/lib/security";
 
 export async function GET(req: NextRequest) {
   const student = await getStudentFromRequest(req);
   if (!student) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // L9: rate limit
+  const rl = rateLimit(req, { windowMs: 60_000, maxRequests: 60 });
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 60);
 
   const results = await db.challengeResult.findMany({
     where: { studentId: student.id },

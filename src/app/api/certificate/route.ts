@@ -1,9 +1,13 @@
-// Certificate generation endpoint
+// Certificate generation endpoint — hardened post-pentest
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getStudentFromRequest, validateCSRF } from "../auth/route";
 import { CHALLENGES } from "@/lib/challenges-data";
-import { rateLimit, rateLimitResponse } from "@/lib/security";
+import {
+  rateLimit,
+  rateLimitResponse,
+  parseJsonObjectBody,
+} from "@/lib/security";
 
 function genId(prefix: string, length = 8) {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -37,10 +41,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
   }
 
-  // Rate limit: 5 cert requests per hour per IP
   const rl = rateLimit(req, { windowMs: 3_600_000, maxRequests: 5 });
-  if (!rl.allowed) {
-    return rateLimitResponse(rl.retryAfter);
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 5);
+
+  // Parse body (even though we don't use it) to enforce Content-Type + reject null
+  const parsed = await parseJsonObjectBody(req);
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: parsed.status });
   }
 
   // Verify all 20 challenges completed
@@ -62,7 +69,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Check for existing certificate
   let cert = await db.certificate.findFirst({
     where: { studentId: student.id },
   });

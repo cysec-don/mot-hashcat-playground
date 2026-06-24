@@ -133,6 +133,17 @@ export function AdminView() {
   };
 
   const exportCSV = () => {
+    // M9: CSV formula injection protection — prefix cells starting with =, +, -, @, tab, CR with a single quote
+    const safeCell = (c: unknown): string => {
+      let s = String(c ?? "");
+      if (/^[=+\-@\t\r]/.test(s)) {
+        s = "'" + s;
+      }
+      // Escape double quotes by doubling them per RFC 4180
+      s = s.replace(/"/g, '""');
+      return `"${s}"`;
+    };
+
     const headers = ["Full Name", "Email", "XP", "Rank", "Completed", "Completion %", "Certificates", "Playground Sessions", "Achievements", "Created", "Last Active"];
     const rows = students.map((s) => [
       s.fullName,
@@ -147,8 +158,9 @@ export function AdminView() {
       new Date(s.createdAt).toISOString(),
       new Date(s.lastActiveAt).toISOString(),
     ]);
-    const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
+    const csv = [headers, ...rows].map((r) => r.map(safeCell).join(",")).join("\n");
+    // Prepend BOM for Excel UTF-8 compatibility
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;

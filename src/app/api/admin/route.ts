@@ -1,10 +1,14 @@
-// Admin endpoints
+// Admin endpoints — hardened post-pentest
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getStudentFromRequest, validateCSRF } from "../auth/route";
 import { CHALLENGES } from "@/lib/challenges-data";
 import { getRankByXp } from "@/lib/achievements-data";
-import { rateLimit, rateLimitResponse } from "@/lib/security";
+import {
+  rateLimit,
+  rateLimitResponse,
+  parseJsonObjectBody,
+} from "@/lib/security";
 
 async function requireAdmin(req: NextRequest) {
   const student = await getStudentFromRequest(req);
@@ -17,6 +21,10 @@ export async function GET(req: NextRequest) {
   if (!admin) {
     return NextResponse.json({ error: "Admin access required" }, { status: 403 });
   }
+
+  // L9: rate limit admin GET
+  const rl = rateLimit(req, { windowMs: 60_000, maxRequests: 30 });
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 30);
 
   const url = new URL(req.url);
   const action = url.searchParams.get("action") || "overview";
@@ -115,35 +123,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
   }
 
-  // Rate limit admin mutations: 30 per minute
   const rl = rateLimit(req, { windowMs: 60_000, maxRequests: 30 });
-  if (!rl.allowed) {
-    return rateLimitResponse(rl.retryAfter);
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 30);
+
+  const parsed = await parseJsonObjectBody(req);
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: parsed.status });
   }
+  const body = parsed.body;
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
-
-  const { action, studentId } = body as { action?: string; studentId?: string };
-
-  if (typeof action !== "string" || typeof studentId !== "string") {
+  if (typeof body.action !== "string" || typeof body.studentId !== "string") {
     return NextResponse.json({ error: "Invalid action or studentId" }, { status: 400 });
   }
 
-  if (action === "reset-progress") {
-    // Prevent self-reset
-    if (studentId === admin.id) {
+  if (body.action === "reset-progress") {
+    if (body.studentId === admin.id) {
       return NextResponse.json(
         { error: "Cannot reset your own progress." },
         { status: 400 }
       );
     }
-    // Prevent resetting other admins
-    const target = await db.student.findUnique({ where: { id: studentId } });
+    const target = await db.student.findUnique({ where: { id: body.studentId } });
     if (!target) {
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
@@ -154,11 +154,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await db.challengeResult.deleteMany({ where: { studentId } });
-    await db.studentAchievement.deleteMany({ where: { studentId } });
-    await db.certificate.deleteMany({ where: { studentId } });
+    await db.challengeResult.deleteMany({ where: { studentId: body.studentId } });
+    await db.studentAchievement.deleteMany({ where: { studentId: body.studentId } });
+    await db.certificate.deleteMany({ where: { studentId: body.studentId } });
     await db.student.update({
-      where: { id: studentId },
+      where: { id: body.studentId },
       data: { xp: 0, rank: 1 },
     });
     return NextResponse.json({ ok: true });

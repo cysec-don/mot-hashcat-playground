@@ -1,10 +1,18 @@
-// Challenge progress + answer verification
+// Challenge progress + answer verification — hardened post-pentest
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getStudentFromRequest, validateCSRF } from "../auth/route";
 import { CHALLENGES, getChallenge } from "@/lib/challenges-data";
 import { ACHIEVEMENTS, RANKS, getRankByXp } from "@/lib/achievements-data";
-import { rateLimit, rateLimitResponse, sanitizeString } from "@/lib/security";
+import {
+  rateLimit,
+  rateLimitResponse,
+  sanitizeString,
+  parseJsonObjectBody,
+  asInteger,
+} from "@/lib/security";
+
+const TOTAL_CHALLENGES = CHALLENGES.length;
 
 // GET /api/progress — returns challenge list with completion status
 export async function GET(req: NextRequest) {
@@ -12,6 +20,10 @@ export async function GET(req: NextRequest) {
   if (!student) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // L9: rate limit GET
+  const rl = rateLimit(req, { windowMs: 60_000, maxRequests: 60 });
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 60);
 
   const results = await db.challengeResult.findMany({
     where: { studentId: student.id },
@@ -45,43 +57,46 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
   }
 
-  // Rate limit: 30 submissions per minute per IP
   const rl = rateLimit(req, { windowMs: 60_000, maxRequests: 30 });
-  if (!rl.allowed) {
-    return rateLimitResponse(rl.retryAfter);
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 30);
+
+  const parsed = await parseJsonObjectBody(req);
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: parsed.status });
+  }
+  const body = parsed.body;
+
+  // L11: strict integer validation
+  const challengeId = asInteger(body.challengeId, { min: 1, max: TOTAL_CHALLENGES });
+  if (challengeId === null) {
+    return NextResponse.json(
+      { error: "Invalid challengeId (must be an integer 1-20)." },
+      { status: 400 }
+    );
   }
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  if (typeof body.answer !== "string" || body.answer.length === 0 || body.answer.length > 1000) {
+    return NextResponse.json(
+      { error: "Invalid answer (must be a non-empty string, max 1000 chars)." },
+      { status: 400 }
+    );
   }
 
-  const { challengeId, answer, hintsUsed = 0 } = body as {
-    challengeId?: number;
-    answer?: string;
-    hintsUsed?: number;
-  };
-
-  if (!challengeId || typeof challengeId !== "number") {
-    return NextResponse.json({ error: "Invalid challengeId" }, { status: 400 });
-  }
-  if (typeof answer !== "string" || answer.length === 0 || answer.length > 1000) {
-    return NextResponse.json({ error: "Invalid answer" }, { status: 400 });
-  }
-  if (typeof hintsUsed !== "number" || hintsUsed < 0 || hintsUsed > 3) {
-    return NextResponse.json({ error: "Invalid hintsUsed" }, { status: 400 });
+  const hintsUsed = asInteger(body.hintsUsed ?? 0, { min: 0, max: 3 });
+  if (hintsUsed === null) {
+    return NextResponse.json(
+      { error: "Invalid hintsUsed (must be an integer 0-3)." },
+      { status: 400 }
+    );
   }
 
-  const challenge = getChallenge(Number(challengeId));
+  const challenge = getChallenge(challengeId);
   if (!challenge) {
     return NextResponse.json({ error: "Challenge not found" }, { status: 404 });
   }
 
-  const sanitizedAnswer = sanitizeString(answer, 200);
+  const sanitizedAnswer = sanitizeString(body.answer, 200);
 
-  // Check correctness based on question type
   let correct = false;
   if (challenge.questionType === "crack") {
     correct =
@@ -91,7 +106,6 @@ export async function POST(req: NextRequest) {
     correct = sanitizedAnswer === challenge.expectedOption;
   }
 
-  // Find or create result record
   let result = await db.challengeResult.findUnique({
     where: {
       studentId_challengeId: {
@@ -113,6 +127,31 @@ export async function POST(req: NextRequest) {
         completedAt: correct ? new Date() : null,
       },
     });
+
+    // Award XP on first-time completion (was missing — logic bug noted by Agent #6)
+    if (correct) {
+      await db.student.update({
+        where: { id: student.id },
+        data: { xp: { increment: challenge.xp } },
+      });
+      await db.activityLog.create({
+        data: {
+          studentId: student.id,
+          action: "challenge_completed",
+          detail: `Completed: ${challenge.title}`,
+          xpDelta: challenge.xp,
+        },
+      });
+    } else {
+      await db.activityLog.create({
+        data: {
+          studentId: student.id,
+          action: "challenge_attempt",
+          detail: `Attempted: ${challenge.title}`,
+          xpDelta: 0,
+        },
+      });
+    }
   } else {
     const newAttempts = result.attempts + 1;
     const newHintsUsed = Math.max(result.hintsUsed, hintsUsed);
@@ -134,7 +173,6 @@ export async function POST(req: NextRequest) {
         where: { id: student.id },
         data: { xp: { increment: challenge.xp } },
       });
-
       await db.activityLog.create({
         data: {
           studentId: student.id,
@@ -188,7 +226,7 @@ export async function POST(req: NextRequest) {
     sha2Completed,
     walletCompleted,
     perfectScoreCount,
-    allCompleted: completedIds.length === CHALLENGES.length,
+    allCompleted: completedIds.length === TOTAL_CHALLENGES,
   };
 
   const existingAch = await db.studentAchievement.findMany({
@@ -207,7 +245,6 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Update rank
   const currentRank = getRankByXp(totalXp);
   const newRankId = RANKS.indexOf(currentRank) + 1;
   if (freshStudent && freshStudent.rank !== newRankId) {
@@ -230,7 +267,7 @@ export async function POST(req: NextRequest) {
   });
 }
 
-// PATCH — record hint usage
+// PATCH — record hint usage (H5: now validates challengeId range)
 export async function PATCH(req: NextRequest) {
   const student = await getStudentFromRequest(req);
   if (!student) {
@@ -240,23 +277,29 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
   }
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
+  const rl = rateLimit(req, { windowMs: 60_000, maxRequests: 60 });
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 60);
 
-  const { challengeId } = body as { challengeId?: number };
-  if (!challengeId || typeof challengeId !== "number") {
-    return NextResponse.json({ error: "Invalid challengeId" }, { status: 400 });
+  const parsed = await parseJsonObjectBody(req);
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: parsed.status });
+  }
+  const body = parsed.body;
+
+  // H5: validate challengeId is an integer in valid range
+  const challengeId = asInteger(body.challengeId, { min: 1, max: TOTAL_CHALLENGES });
+  if (challengeId === null) {
+    return NextResponse.json(
+      { error: "Invalid challengeId (must be an integer 1-20)." },
+      { status: 400 }
+    );
   }
 
   let result = await db.challengeResult.findUnique({
     where: {
       studentId_challengeId: {
         studentId: student.id,
-        challengeId: Number(challengeId),
+        challengeId,
       },
     },
   });
@@ -265,7 +308,7 @@ export async function PATCH(req: NextRequest) {
     result = await db.challengeResult.create({
       data: {
         studentId: student.id,
-        challengeId: Number(challengeId),
+        challengeId,
         attempts: 0,
         hintsUsed: 1,
         completed: false,

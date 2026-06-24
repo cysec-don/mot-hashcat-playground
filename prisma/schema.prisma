@@ -12,6 +12,7 @@ datasource db {
 model Student {
   id              String   @id @default(cuid())
   fullName        String   @unique
+  fullNameLower   String   @unique
   email           String?
   passwordHash    String
   createdAt       DateTime @default(now())
