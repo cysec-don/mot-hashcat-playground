@@ -4,7 +4,7 @@ import { CHALLENGES } from "../src/lib/challenges-data";
 
 async function main() {
   const student = await db.student.findFirst({
-    where: { fullName: "Test Operator" },
+    where: { fullName: "Pentest Agent Eight" },
   });
   if (!student) {
     console.error("Student not found");
