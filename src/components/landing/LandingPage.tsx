@@ -66,7 +66,7 @@ function HeroSection() {
               <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
             </span>
             <span className="text-xs font-medium text-cyan-300 tracking-wider uppercase">
-              Live Cyber Range · 20 Guided Labs · Professional Certification
+              Live Cyber Range · 100 Guided Labs · Professional Certification
             </span>
           </div>
 
@@ -93,7 +93,7 @@ function HeroSection() {
           </p>
 
           <p className="mt-3 text-sm text-slate-400 max-w-2xl mx-auto">
-            20 Practical Labs · Interactive Cyber Range · Wallet Recovery
+            100 Practical Labs · Interactive Cyber Range · Wallet Recovery
             Training · XP &amp; Rankings · Premium PDF Certification
           </p>
 
@@ -135,7 +135,7 @@ function HeroSection() {
               <CheckCircle2 className="h-4 w-4 text-emerald-400" /> 4 Modules
             </div>
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-emerald-400" /> 20 Challenges
+              <CheckCircle2 className="h-4 w-4 text-emerald-400" /> 100 Challenges
             </div>
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="h-4 w-4 text-emerald-400" /> Hashcat
@@ -225,7 +225,7 @@ function HeroSection() {
 /* ---------------- STATS BAR ---------------- */
 function StatsBar() {
   const stats = [
-    { label: "Challenges", value: "20", icon: Terminal },
+    { label: "Challenges", value: "100", icon: Terminal },
     { label: "Modules", value: "4", icon: Cpu },
     { label: "Hash Types", value: "4+", icon: Lock },
     { label: "Achievements", value: "12", icon: Award },
@@ -383,7 +383,7 @@ function CurriculumSection() {
                 {m.description}
               </p>
               <div className="flex flex-wrap gap-2">
-                {m.challenges.map((c) => (
+                {m.challengeIds.map((c) => (
                   <span
                     key={c}
                     className="text-[11px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-400 font-mono"

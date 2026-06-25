@@ -5,9 +5,6 @@ import { motion } from "framer-motion";
 import {
   Trophy,
   Crown,
-  Zap,
-  Award,
-  TrendingUp,
   Users,
   Star,
 } from "lucide-react";
@@ -153,7 +150,7 @@ export function LeaderboardView() {
                 </div>
                 <div className="hidden sm:flex flex-col items-end mr-4">
                   <div className="text-xs text-slate-400">
-                    {e.completedCount}/20 challenges
+                    {e.completedCount}/100 challenges
                   </div>
                   <div className="text-[10px] text-slate-600">
                     {e.certificatesEarned} cert{e.certificatesEarned === 1 ? "" : "s"}
@@ -244,7 +241,7 @@ function PodiumCard({
         </div>
         <div className="text-[10px] text-slate-500 uppercase tracking-wider">XP</div>
         <div className="mt-2 flex justify-center gap-3 text-[10px] text-slate-500">
-          <span>{entry.completedCount}/20</span>
+          <span>{entry.completedCount}/100</span>
           <span>·</span>
           <span>{entry.certificatesEarned} cert{entry.certificatesEarned === 1 ? "" : "s"}</span>
         </div>

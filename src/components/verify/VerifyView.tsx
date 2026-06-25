@@ -12,7 +12,6 @@ import {
   Calendar,
   User,
   Hash,
-  ExternalLink,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

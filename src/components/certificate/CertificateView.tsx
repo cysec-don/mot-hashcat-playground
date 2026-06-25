@@ -120,7 +120,7 @@ export function CertificateView() {
 
           <div className="mt-6 max-w-md mx-auto">
             <div className="flex justify-between text-xs text-slate-400 mb-2">
-              <span>{completedCount}/20 completed</span>
+              <span>{completedCount}/100 completed</span>
               <span>{stats.completionPercent.toFixed(0)}%</span>
             </div>
             <div className="h-3 rounded-full bg-[#0B0F19] border border-cyan-500/15 overflow-hidden">
@@ -164,7 +164,7 @@ export function CertificateView() {
         <Card className="cyber-card p-8 sm:p-12 text-center border-amber-500/40 bg-gradient-to-br from-amber-500/10 to-transparent">
           <Trophy className="h-16 w-16 text-amber-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">
-            All 20 Challenges Complete!
+            All 100 Challenges Complete!
           </h2>
           <p className="text-sm text-slate-300 max-w-md mx-auto">
             You&rsquo;ve mastered MD5, SHA1, SHA2-256, and simulated wallet.dat
@@ -325,7 +325,7 @@ export function CertificateView() {
           <DetailRow label="Completion" value={`${cert.completionPercent.toFixed(0)}%`} />
           <DetailRow label="Program" value="MOT Hashcat Playground Certification" />
           <DetailRow label="Modules Completed" value="4 / 4" />
-          <DetailRow label="Challenges Completed" value="20 / 20" />
+          <DetailRow label="Challenges Completed" value="100 / 100" />
         </div>
       </Card>
     </div>

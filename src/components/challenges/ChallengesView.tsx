@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import {
   Terminal,
   CheckCircle2,
-  Lock,
   Star,
   Zap,
   ChevronRight,
@@ -22,13 +21,18 @@ const DIFFICULTY_COLOR: Record<string, string> = {
   Beginner: "#00FF88",
   Intermediate: "#FFC857",
   Advanced: "#FF5C5C",
+  Expert: "#B484FF",
 };
 
 const MODULE_COLOR: Record<string, string> = {
-  MD5: "#00E5FF",
-  SHA1: "#00FF88",
-  "SHA2-256": "#FFC857",
-  "WALLET.DAT": "#B484FF",
+  "Hash Identification": "#00E5FF",
+  "Hashcat Modes": "#00FF88",
+  "Wordlist Attacks": "#FFC857",
+  "Rule Attacks": "#B484FF",
+  "Mask Attacks": "#FF5C5C",
+  "Combinator Attacks": "#10B981",
+  "Hybrid Attacks": "#8B5CF6",
+  "Wallet.dat Training": "#F59E0B",
 };
 
 export function ChallengesView() {
@@ -74,7 +78,7 @@ export function ChallengesView() {
         <div className="flex items-center gap-3">
           <Card className="cyber-card p-3 px-4 flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-            <span className="text-sm font-bold text-white">{totalCompleted}/20</span>
+            <span className="text-sm font-bold text-white">{totalCompleted}/100</span>
             <span className="text-xs text-slate-500">completed</span>
           </Card>
           <Card className="cyber-card p-3 px-4 flex items-center gap-2">
@@ -237,7 +241,7 @@ export function ChallengesView() {
           <Card className="cyber-card p-8 text-center border-amber-500/40 bg-gradient-to-br from-amber-500/10 to-transparent">
             <Trophy className="h-12 w-12 text-amber-400 mx-auto mb-3" />
             <h3 className="text-2xl font-bold text-white">
-              All 20 Challenges Complete!
+              All 100 Challenges Complete!
             </h3>
             <p className="mt-2 text-sm text-slate-400 max-w-xl mx-auto">
               You've earned your certification. Generate your premium PDF

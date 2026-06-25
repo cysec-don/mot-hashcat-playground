@@ -11,7 +11,6 @@ import {
   CheckCircle2,
   XCircle,
   Zap,
-  Award,
   Target,
   BookOpen,
   Shield,
@@ -19,18 +18,13 @@ import {
   ChevronRight,
   Loader2,
   Lock,
-  Sparkles,
   ArrowRight,
   Copy,
-  Eye,
-  AlertCircle,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { getChallenge, CHALLENGES } from "@/lib/challenges-data";
@@ -184,7 +178,7 @@ export function ChallengeDetailView() {
             </Badge>
           )}
         </div>
-        <div className="text-xs text-slate-500 mb-1">Challenge {String(challenge.id).padStart(2, "0")}/20</div>
+        <div className="text-xs text-slate-500 mb-1">Challenge {String(challenge.id).padStart(2, "0")}/100</div>
         <h1 className="text-3xl font-bold text-white">{challenge.title}</h1>
       </motion.div>
 

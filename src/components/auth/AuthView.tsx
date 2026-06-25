@@ -13,7 +13,6 @@ import {
   ArrowLeft,
   ShieldCheck,
   Lock,
-  Sparkles,
   AlertCircle,
   Eye,
   EyeOff,

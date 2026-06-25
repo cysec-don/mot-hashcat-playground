@@ -198,18 +198,16 @@ export async function POST(req: NextRequest) {
     where: { studentId: student.id },
   });
   const completedIds = allResults.filter((r) => r.completed).map((r) => r.challengeId);
-  const md5Completed = CHALLENGES.filter(
-    (c) => c.module === "MD5" && completedIds.includes(c.id)
-  ).length;
-  const sha1Completed = CHALLENGES.filter(
-    (c) => c.module === "SHA1" && completedIds.includes(c.id)
-  ).length;
-  const sha2Completed = CHALLENGES.filter(
-    (c) => c.module === "SHA2-256" && completedIds.includes(c.id)
-  ).length;
-  const walletCompleted = CHALLENGES.filter(
-    (c) => c.module === "WALLET.DAT" && completedIds.includes(c.id)
-  ).length;
+  const countModule = (moduleName: string) =>
+    CHALLENGES.filter((c) => c.module === moduleName && completedIds.includes(c.id)).length;
+  const hashIdCompleted = countModule("Hash Identification");
+  const hashcatModesCompleted = countModule("Hashcat Modes");
+  const wordlistCompleted = countModule("Wordlist Attacks");
+  const ruleCompleted = countModule("Rule Attacks");
+  const maskCompleted = countModule("Mask Attacks");
+  const combinatorCompleted = countModule("Combinator Attacks");
+  const hybridCompleted = countModule("Hybrid Attacks");
+  const walletCompleted = countModule("Wallet.dat Training");
   const perfectScoreCount = allResults.filter(
     (r) => r.completed && r.hintsUsed === 0
   ).length;
@@ -221,10 +219,15 @@ export async function POST(req: NextRequest) {
     completedChallenges: completedIds,
     totalXp,
     playgroundRuns: await db.playgroundLog.count({ where: { studentId: student.id } }),
-    md5Completed,
-    sha1Completed,
-    sha2Completed,
+    hashIdCompleted,
+    hashcatModesCompleted,
+    wordlistCompleted,
     walletCompleted,
+    ruleCompleted,
+    maskCompleted,
+    combinatorCompleted,
+    hybridCompleted,
+    wordlistCompleted,
     perfectScoreCount,
     allCompleted: completedIds.length === TOTAL_CHALLENGES,
   };

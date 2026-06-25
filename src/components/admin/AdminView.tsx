@@ -346,7 +346,7 @@ export function AdminView() {
                         <span className="text-xs text-slate-300">{s.rank}</span>
                       </td>
                       <td className="py-3 px-3">
-                        <div className="text-xs text-white font-medium">{s.completedCount}/20</div>
+                        <div className="text-xs text-white font-medium">{s.completedCount}/100</div>
                         <div className="text-[10px] text-slate-500">{s.completionPercent.toFixed(0)}%</div>
                       </td>
                       <td className="py-3 px-3 hidden lg:table-cell">

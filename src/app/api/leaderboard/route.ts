@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
       rankId: rank.id,
       rankColor: rank.color,
       completedCount: s.challengeResults.length,
-      completionPercent: (s.challengeResults.length / 20) * 100,
+      completionPercent: (s.challengeResults.length / 100) * 100,
       certificatesEarned: s.certificates.length,
       // M11: lastActiveAt intentionally omitted from public leaderboard
     };

@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
   if (!allCompleted) {
     return NextResponse.json(
       {
-        error: "All 20 challenges must be completed to generate a certificate.",
+        error: "All challenges must be completed to generate a certificate.",
         completedCount: completedIds.size,
         totalCount: CHALLENGES.length,
       },

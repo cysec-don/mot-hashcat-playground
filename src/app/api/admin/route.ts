@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
       rank: getRankByXp(s.xp).name,
       isAdmin: s.isAdmin,
       completedCount: s.challengeResults.length,
-      completionPercent: (s.challengeResults.length / 20) * 100,
+      completionPercent: (s.challengeResults.length / 100) * 100,
       certificatesEarned: s.certificates.length,
       playgroundSessions: s._count.playgroundLogs,
       achievementsUnlocked: s._count.achievements,

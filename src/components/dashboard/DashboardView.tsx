@@ -11,14 +11,12 @@ import {
   Target,
   TrendingUp,
   Crown,
-  Flame,
   CheckCircle2,
   Lock,
   ArrowRight,
   Activity,
   Wrench,
   Sparkles,
-  Star,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -82,7 +80,7 @@ export function DashboardView() {
           {stats.completedCount === 0
             ? "Your journey begins now. Start with Module 1 — MD5."
             : stats.completedCount === 20
-            ? "Congratulations, Grandmaster. All 20 challenges complete."
+            ? "Congratulations, Grandmaster. All 100 challenges complete."
             : `${stats.remainingCount} challenge${stats.remainingCount === 1 ? "" : "s"} remaining to graduation.`}
         </p>
       </motion.div>
@@ -91,7 +89,7 @@ export function DashboardView() {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         <StatCard
           label="Completed"
-          value={`${stats.completedCount}/20`}
+          value={`${stats.completedCount}/100`}
           icon={CheckCircle2}
           color="#00FF88"
         />
@@ -199,8 +197,8 @@ export function DashboardView() {
             </div>
             <div className="space-y-4">
               {MODULES.map((m) => {
-                const completed = m.challenges.filter((c) => completedIds.has(c)).length;
-                const pct = (completed / m.challenges.length) * 100;
+                const completed = m.challengeIds.filter((c) => completedIds.has(c)).length;
+                const pct = (completed / m.challengeIds.length) * 100;
                 return (
                   <div key={m.name}>
                     <div className="flex items-center justify-between mb-1.5">
@@ -214,7 +212,7 @@ export function DashboardView() {
                         </span>
                       </div>
                       <span className="text-xs text-slate-400">
-                        {completed}/{m.challenges.length}
+                        {completed}/{m.challengeIds.length}
                       </span>
                     </div>
                     <Progress
@@ -399,7 +397,7 @@ export function DashboardView() {
                   Complete all 20 challenges
                 </div>
                 <div className="text-[11px] text-slate-500 mt-1">
-                  {stats.completedCount}/20 completed
+                  {stats.completedCount}/100 completed
                 </div>
                 <Progress
                   value={stats.completionPercent}

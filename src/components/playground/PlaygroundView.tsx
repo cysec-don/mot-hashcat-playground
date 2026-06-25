@@ -4,11 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Terminal,
-  Upload,
   Settings2,
-  Library,
-  Wand2,
-  Grid3x3,
   Cpu,
   Play,
   Square,
@@ -16,7 +12,6 @@ import {
   RotateCcw,
   CheckCircle2,
   Zap,
-  Lightbulb,
   Bot,
   Send,
   Loader2,
