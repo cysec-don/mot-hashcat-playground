@@ -1,6 +1,4 @@
-// Leaderboard endpoint (public, rate-limited) — hardened post-pentest
-// M11: removed lastActiveAt from public response (admin-only now)
-// M6+M7+L14: fixed limit validation (NaN, negative, zero) and total count
+// Leaderboard endpoint (public, rate-limited) — enhanced with time-period tabs
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getRankByXp } from "@/lib/achievements-data";
@@ -12,9 +10,9 @@ export async function GET(req: NextRequest) {
 
   const url = new URL(req.url);
   const raw = url.searchParams.get("limit");
+  const period = url.searchParams.get("period") || "all";
 
-  // M6+M7: validate limit — must be a positive integer, capped at 200
-  let limit = 50; // default
+  let limit = 50;
   if (raw !== null) {
     const parsed = parseInt(raw, 10);
     if (!Number.isInteger(parsed) || parsed < 1) {
@@ -26,7 +24,18 @@ export async function GET(req: NextRequest) {
     limit = Math.min(parsed, 200);
   }
 
+  // Calculate date filter for time periods
+  let dateFilter: Date | undefined;
+  if (period === "weekly") {
+    dateFilter = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  } else if (period === "monthly") {
+    dateFilter = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  }
+
+  const where = dateFilter ? { lastActiveAt: { gte: dateFilter } } : {};
+
   const students = await db.student.findMany({
+    where,
     orderBy: { xp: "desc" },
     take: limit,
     include: {
@@ -35,7 +44,6 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  // L14: total is the ACTUAL total student count, not the returned slice
   const totalStudents = await db.student.count();
 
   const ranked = students.map((s, i) => {
@@ -50,7 +58,6 @@ export async function GET(req: NextRequest) {
       completedCount: s.challengeResults.length,
       completionPercent: (s.challengeResults.length / 100) * 100,
       certificatesEarned: s.certificates.length,
-      // M11: lastActiveAt intentionally omitted from public leaderboard
     };
   });
 
@@ -58,5 +65,6 @@ export async function GET(req: NextRequest) {
     leaderboard: ranked,
     returned: students.length,
     total: totalStudents,
+    period,
   });
 }

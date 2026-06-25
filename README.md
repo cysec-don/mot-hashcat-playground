@@ -34,14 +34,18 @@ An elite, production-grade cybersecurity training platform for mastering Hashcat
 
 ## Overview
 
-MOT Hashcat Playground is a complete cybersecurity certification platform that teaches password-cracking methodology through 20 progressive hands-on challenges across four modules:
+MOT Hashcat Playground is a complete cybersecurity certification platform that teaches password-cracking methodology through 100 progressive hands-on challenges across eight modules:
 
-1. **MD5** — Foundational hash cracking (5 challenges)
-2. **SHA1** — 160-bit hash operations (5 challenges)
-3. **SHA2-256** — Modern hash analysis (5 challenges)
-4. **Wallet.dat Training** — Simulated cryptocurrency wallet recovery (5 challenges)
+1. **Hash Identification** — MD5, SHA1, SHA256, SHA512, bcrypt, NTLM, LM, MySQL, PostgreSQL, SHA-3, RIPEMD-160, DES, md5crypt, SHA256crypt, SHA512crypt, MS Office, PKZIP, WinZip, PDF, 7-Zip (30 challenges)
+2. **Hashcat Modes** — Correct mode number identification for all supported hash types (15 challenges)
+3. **Wordlist Attacks** — Rockyou, custom lists, targeted wordlists, CeWL (10 challenges)
+4. **Rule Attacks** — best64.rule, dive.rule, OneRuleToRuleThemAll, rule prediction (10 challenges)
+5. **Mask Attacks** — Charset creation, pattern analysis, password profiling (10 challenges)
+6. **Combinator Attacks** — Dictionary combining, hybrid workflows (5 challenges)
+7. **Hybrid Attacks** — Wordlist+Mask, Mask+Wordlist, increment, rules (10 challenges)
+8. **Wallet.dat Training** — Bitcoin/Litecoin mock wallet recovery methodology (10 challenges)
 
-The platform features a flagship **Hashcat Playground** — an interactive cyber range with an attack builder, simulated terminal, and AI-powered learning assistant. Students earn XP, climb ranks (Script Kiddie → MOT Grandmaster), unlock achievements, compete on a global leaderboard, and earn a premium PDF certificate upon completing all 20 challenges.
+The platform features a flagship **Hashcat Playground** — an interactive cyber range with an attack builder, simulated terminal, and AI-powered learning assistant. Students earn XP, climb ranks (Script Kiddie → MOT Grandmaster), unlock achievements, compete on a global leaderboard (All-Time / Monthly / Weekly), share achievements on social media, download digital badges, and earn a premium PDF certificate upon completing all 100 challenges.
 
 > **Educational Use Only**: All hashes are well-known public test vectors. No real wallets, no real cryptocurrency, no real credentials are used. The wallet.dat module uses 100% mock training files.
 
@@ -50,9 +54,13 @@ The platform features a flagship **Hashcat Playground** — an interactive cyber
 ## Features
 
 ### Core Platform
-- **20 Progressive Challenges** — Beginner → Intermediate → Advanced, each with scenario, objective, educational context, 3-tier hint system, recommended commands, best practices, and defense recommendations
+- **100 Progressive Challenges** — Beginner → Intermediate → Advanced → Expert, each with scenario, objective, educational context, 4-tier progressive hint system, recommended commands, best practices, and defense recommendations
+- **Answer Randomization** — Fisher-Yates shuffle on every challenge load using crypto.getRandomValues — correct answers appear in random positions each time
+- **Progressive Hints** — Wrong answers show educational guidance, never the correct answer; explanation only revealed upon correct completion
 - **Interactive Hashcat Playground** — Visual attack builder (Config / Wordlist / Rules / Mask tabs), real-time command generator, simulated terminal with speed/progress/ETA, and an AI learning assistant
-- **Gamification** — 7 ranks, 12 achievements, XP system, global leaderboard with podium
+- **Gamification** — 7 ranks, 16 achievements, XP system, global leaderboard with All-Time/Monthly/Weekly tabs and podium
+- **Social Sharing** — One-click sharing to LinkedIn, Facebook, X (Twitter), Instagram, WhatsApp, Telegram; downloadable share cards
+- **Digital Badges** — 8 downloadable PNG badges (MD5 Apprentice, Hash ID Master, Mode Specialist, Rule Wizard, Mask Master, Wallet Hunter, Hashcat Operator, MOT Grandmaster)
 - **Premium PDF Certification** — Luxury gold-bordered certificate with embossed seal, binary watermark, QR-verifiable ID, and dual signature lines
 - **Certificate Verification Portal** — Public lookup by Certificate ID or Verification Number
 - **Admin Panel** — Student management, CSV export, analytics dashboard with per-challenge completion charts
@@ -701,7 +709,7 @@ bun run start
 3. **Register** with your Full Name and a strong password
    - Password requirements: min 8 chars, must include upper/lower case, a digit, and a special character
    - The first registered user automatically becomes the admin
-4. **Start challenges** from the Dashboard — begin with Module 1 (MD5)
+4. **Start challenges** from the Dashboard — begin with Module 1 (Hash Identification)
 
 ### Admin Access
 
@@ -727,13 +735,13 @@ The platform has **separate Register and Login pages**:
 ### For Students
 
 1. **Register** with your full name (Latin letters only) and a password (min 8 chars, must include upper/lower/digit/special)
-2. **Complete Challenges** — Start with Module 1 (MD5), progress through SHA1, SHA2-256, and Wallet.dat
+2. **Complete Challenges** — Start with Module 1 (Hash Identification), progress through all 8 modules
 3. **Use Hints** — Each challenge has 3 progressive hints (using hints doesn't block progress)
 4. **Practice** in the Hashcat Playground — experiment with attack modes, wordlists, rules, and masks
 5. **Ask the AI Tutor** — Built into the Playground, explains concepts and suggests strategies
 6. **Climb the Leaderboard** — Earn XP from challenges (100-500 XP each) and playground sessions (10 XP each)
 7. **Earn Achievements** — 12 achievements unlock automatically as you progress
-8. **Get Certified** — Complete all 20 challenges to unlock your premium PDF certificate
+8. **Get Certified** — Complete all 100 challenges to unlock your premium PDF certificate
 
 ### For Administrators
 

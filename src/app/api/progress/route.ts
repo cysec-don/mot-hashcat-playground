@@ -222,12 +222,11 @@ export async function POST(req: NextRequest) {
     hashIdCompleted,
     hashcatModesCompleted,
     wordlistCompleted,
-    walletCompleted,
     ruleCompleted,
     maskCompleted,
     combinatorCompleted,
     hybridCompleted,
-    wordlistCompleted,
+    walletCompleted,
     perfectScoreCount,
     allCompleted: completedIds.length === TOTAL_CHALLENGES,
   };
