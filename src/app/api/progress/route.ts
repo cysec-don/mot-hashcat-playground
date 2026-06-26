@@ -82,10 +82,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const hintsUsed = asInteger(body.hintsUsed ?? 0, { min: 0, max: 3 });
+  const hintsUsed = asInteger(body.hintsUsed ?? 0, { min: 0, max: 4 });
   if (hintsUsed === null) {
     return NextResponse.json(
-      { error: "Invalid hintsUsed (must be an integer 0-3)." },
+      { error: "Invalid hintsUsed (must be an integer 0-4)." },
       { status: 400 }
     );
   }

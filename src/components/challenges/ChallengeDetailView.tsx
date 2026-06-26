@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   XCircle,
   Zap,
+  Award,
   Target,
   BookOpen,
   Shield,
@@ -20,6 +21,7 @@ import {
   Lock,
   ArrowRight,
   Copy,
+  Share2,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,12 +33,32 @@ import { getChallenge, CHALLENGES } from "@/lib/challenges-data";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiFetch } from "@/lib/api-client";
+import { ShareCard } from "@/components/shared/ShareCard";
 
 const DIFFICULTY_COLOR: Record<string, string> = {
   Beginner: "#00FF88",
   Intermediate: "#FFC857",
   Advanced: "#FF5C5C",
+  Expert: "#B484FF",
 };
+
+// Fisher-Yates shuffle for answer randomization (Issue #1 fix)
+function shuffleArray<T>(arr: T[]): T[] {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor((crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32) * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// Progressive hint messages — never reveal the answer (Issue #2 fix)
+const PROGRESSIVE_HINTS = [
+  "Incorrect. Review the challenge materials and try again.",
+  "Incorrect. Take a closer look at the educational context above.",
+  "Incorrect. Consider reviewing the recommended commands and best practices.",
+  "Incorrect. Would you like to revisit the lesson? The hint system can guide you.",
+];
 
 export function ChallengeDetailView() {
   const { selectedChallengeId, setView, setChallenge } = useApp();
@@ -45,22 +67,31 @@ export function ChallengeDetailView() {
   const [answer, setAnswer] = useState("");
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [hintsUsed, setHintsUsed] = useState(0);
+  const [wrongAttempts, setWrongAttempts] = useState(0);
+  const [shuffledOptions, setShuffledOptions] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [result, setResult] = useState<{
     correct: boolean;
     explanation: string;
     newlyUnlocked?: string[];
   } | null>(null);
 
-  const challenge = selectedChallengeId
-    ? getChallenge(selectedChallengeId)
-    : null;
+  const challenge = selectedChallengeId ? getChallenge(selectedChallengeId) : null;
 
+  // Issue #1: Shuffle options on every challenge load
+  // Issue #2: Reset wrong attempts and result on challenge change
   useEffect(() => {
     setAnswer("");
     setSelectedOption(null);
     setHintsUsed(0);
+    setWrongAttempts(0);
     setResult(null);
+    if (challenge?.options) {
+      setShuffledOptions(shuffleArray(challenge.options));
+    } else {
+      setShuffledOptions([]);
+    }
   }, [selectedChallengeId]);
 
   if (!challenge) {
@@ -74,7 +105,6 @@ export function ChallengeDetailView() {
     );
   }
 
-  // Pre-existing state
   const existingResult = data?.challengeResults.find(
     (r) => r.challengeId === challenge.id
   );
@@ -120,7 +150,9 @@ export function ChallengeDetailView() {
           }
         }
       } else {
-        toast.error("Not quite — review the hints and try again.");
+        // Issue #2: Increment wrong attempts, NEVER reveal the answer
+        setWrongAttempts((prev) => prev + 1);
+        toast.error("Incorrect. Review the materials and try again.");
       }
       refresh();
     } catch (e) {
@@ -132,7 +164,7 @@ export function ChallengeDetailView() {
   };
 
   const useHint = async () => {
-    if (hintsUsed >= 3) return;
+    if (hintsUsed >= 4) return;
     setHintsUsed(hintsUsed + 1);
     apiFetch("/api/progress", {
       method: "PATCH",
@@ -209,11 +241,13 @@ export function ChallengeDetailView() {
               <div className="flex items-center gap-2 mb-3">
                 <Lock className="h-4 w-4 text-amber-400" />
                 <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                  {challenge.hashType} Hash
+                  {challenge.hashType || "Hash"}
                 </h2>
-                <Badge variant="outline" className="text-[10px] border-cyan-500/30 text-cyan-300 ml-auto">
-                  Hashcat -m {challenge.hashcatMode}
-                </Badge>
+                {challenge.hashcatMode !== undefined && (
+                  <Badge variant="outline" className="text-[10px] border-cyan-500/30 text-cyan-300 ml-auto">
+                    Hashcat -m {challenge.hashcatMode}
+                  </Badge>
+                )}
               </div>
               <div className="rounded-lg bg-[#060912] border border-cyan-500/20 p-4">
                 <div className="flex items-center justify-between mb-2">
@@ -280,7 +314,7 @@ export function ChallengeDetailView() {
                   onValueChange={setSelectedOption}
                   className="space-y-2"
                 >
-                  {challenge.options?.map((opt) => (
+                  {shuffledOptions.map((opt) => (
                     <label
                       key={opt}
                       className={`flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition ${
@@ -315,7 +349,7 @@ export function ChallengeDetailView() {
               )}
             </Button>
 
-            {/* Result */}
+            {/* Result — Issue #2: NEVER reveal explanation on wrong answers */}
             <AnimatePresence>
               {result && (
                 <motion.div
@@ -339,24 +373,49 @@ export function ChallengeDetailView() {
                         result.correct ? "text-emerald-300" : "text-rose-300"
                       }`}
                     >
-                      {result.correct ? "Correct!" : "Not quite — try again"}
+                      {result.correct ? "Correct!" : "Incorrect"}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    {result.explanation}
-                  </p>
+                  {/* Explanation ONLY shown when correct — never on wrong answers */}
+                  {result.correct ? (
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      {result.explanation}
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-xs text-rose-200 leading-relaxed">
+                        {PROGRESSIVE_HINTS[Math.min(wrongAttempts - 1, PROGRESSIVE_HINTS.length - 1)] || PROGRESSIVE_HINTS[PROGRESSIVE_HINTS.length - 1]}
+                      </p>
+                      {wrongAttempts >= 2 && (
+                        <p className="text-[11px] text-slate-400">
+                          Wrong attempts: {wrongAttempts}. Use the hint system on the right for progressive guidance.
+                        </p>
+                      )}
+                    </div>
+                  )}
                   {result.correct && nextChallenge && (
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        setChallenge(nextChallenge.id);
-                        setResult(null);
-                      }}
-                      className="mt-3 bg-gradient-to-r from-cyan-400 to-emerald-400 text-[#0B0F19] hover:from-cyan-300 hover:to-emerald-300 font-semibold"
-                    >
-                      Next Challenge
-                      <ArrowRight className="h-3 w-3 ml-1" />
-                    </Button>
+                    <div className="mt-3 flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setChallenge(nextChallenge.id);
+                          setResult(null);
+                        }}
+                        className="bg-gradient-to-r from-cyan-400 to-emerald-400 text-[#0B0F19] hover:from-cyan-300 hover:to-emerald-300 font-semibold"
+                      >
+                        Next Challenge
+                        <ArrowRight className="h-3 w-3 ml-1" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShareOpen(true)}
+                        className="border-amber-500/30 text-amber-300 hover:bg-amber-500/10"
+                      >
+                        <Share2 className="h-3 w-3 mr-1" />
+                        Share
+                      </Button>
+                    </div>
                   )}
                 </motion.div>
               )}
@@ -366,17 +425,17 @@ export function ChallengeDetailView() {
 
         {/* Sidebar - 1/3 */}
         <div className="space-y-6">
-          {/* Hints */}
+          {/* Progressive Hints — 4 levels, never reveal the answer */}
           <Card className="cyber-card p-6">
             <div className="flex items-center gap-2 mb-3">
               <Lightbulb className="h-4 w-4 text-amber-400" />
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Hints</h3>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Progressive Hints</h3>
               <span className="ml-auto text-xs text-slate-500">
-                {effectiveHintsUsed}/3 used
+                {effectiveHintsUsed}/4 used
               </span>
             </div>
             <div className="space-y-3">
-              {[challenge.hint1, challenge.hint2, challenge.hint3].map((h, i) => {
+              {[challenge.hint1, challenge.hint2, challenge.hint3, challenge.hint4].map((h, i) => {
                 const revealed = effectiveHintsUsed > i;
                 return (
                   <div
@@ -388,11 +447,14 @@ export function ChallengeDetailView() {
                     }`}
                   >
                     {revealed ? (
-                      <p className="text-xs text-slate-300 leading-relaxed">{h}</p>
+                      <div>
+                        <div className="text-[10px] text-amber-400/70 uppercase tracking-wider mb-1">Hint {i + 1}</div>
+                        <p className="text-xs text-slate-300 leading-relaxed">{h}</p>
+                      </div>
                     ) : (
                       <button
                         onClick={useHint}
-                        disabled={hintsUsed < i || hintsUsed >= 3}
+                        disabled={hintsUsed < i || hintsUsed >= 4}
                         className="w-full flex items-center gap-2 text-xs text-slate-500 hover:text-amber-300 transition"
                       >
                         <Lock className="h-3 w-3" />
@@ -404,8 +466,8 @@ export function ChallengeDetailView() {
               })}
             </div>
             <p className="text-[10px] text-slate-500 mt-3">
-              Using hints does not block progress, but reduces your &ldquo;perfect
-              score&rdquo; achievement count.
+              Hints provide educational guidance only — they never reveal the answer.
+              Using hints reduces your &ldquo;perfect score&rdquo; achievement count.
             </p>
           </Card>
 
@@ -479,6 +541,15 @@ export function ChallengeDetailView() {
           </Card>
         </div>
       </div>
+
+      {/* Social Share Card */}
+      <ShareCard
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        moduleName={challenge.module}
+        xpEarned={challenge.xp}
+        rankName={data?.stats?.currentRank?.name}
+      />
     </div>
   );
 }
