@@ -2,16 +2,21 @@
 
 ### Master Password Recovery. Master Hashcat. Master the Art of Cracking.
 
-An elite, production-grade cybersecurity training platform for mastering Hashcat, password recovery, MD5/SHA1/SHA2-256 cracking, and simulated cryptocurrency wallet analysis. Combines interactive challenges, a live cyber range, gamification, and professional PDF certification.
+An elite, production-grade cybersecurity training platform for mastering Hashcat, password recovery, and simulated cryptocurrency wallet analysis. Combines 100 interactive challenges across 8 modules, a live cyber range, gamification, social sharing, digital badges, and professional PDF certification.
 
-![MOT Hashcat Playground](https://img.shields.io/badge/Platform-Next.js%2016-black) ![TypeScript](https://img.shields.io/badge/Language-TypeScript-blue) ![License](https://img.shields.io/badge/License-MIT-green) ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
+![Platform](https://img.shields.io/badge/Platform-Next.js%2016-black) ![Language](https://img.shields.io/badge/Language-TypeScript-blue) ![Challenges](https://img.shields.io/badge/Challenges-100-brightgreen) ![Modules](https://img.shields.io/badge/Modules-8-cyan) ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
 
 ## Table of Contents
 
 - [Overview](#overview)
+- [Curriculum](#curriculum)
 - [Features](#features)
+  - [Core Platform](#core-platform)
+  - [Anti-Cheat System](#anti-cheat-system)
+  - [Gamification & Social](#gamification--social)
+  - [Security Hardened](#security-hardened)
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
@@ -24,60 +29,189 @@ An elite, production-grade cybersecurity training platform for mastering Hashcat
 - [Configuration](#configuration)
 - [Running the Application](#running-the-application)
 - [Usage Guide](#usage-guide)
+  - [For Students](#for-students)
+  - [For Administrators](#for-administrators)
+  - [For Employers / Verifiers](#for-employers--verifiers)
 - [Security](#security)
 - [Testing](#testing)
 - [Deployment](#deployment)
+  - [Option 1: Vercel](#option-1-vercel-recommended-for-simplicity)
+  - [Option 2: Docker](#option-2-docker)
+  - [Option 3: VPS / Bare Metal](#option-3-vps--bare-metal)
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
+- [Acknowledgments](#acknowledgments)
 
 ---
 
 ## Overview
 
-MOT Hashcat Playground is a complete cybersecurity certification platform that teaches password-cracking methodology through 100 progressive hands-on challenges across eight modules:
+MOT Hashcat Playground is a complete cybersecurity certification platform that teaches password-cracking methodology through **100 progressive hands-on challenges** across **eight modules**. The platform is designed to rival and exceed the quality of Hack The Box, TryHackMe, OffSec, and SANS Cyber Ranges.
 
-1. **Hash Identification** — MD5, SHA1, SHA256, SHA512, bcrypt, NTLM, LM, MySQL, PostgreSQL, SHA-3, RIPEMD-160, DES, md5crypt, SHA256crypt, SHA512crypt, MS Office, PKZIP, WinZip, PDF, 7-Zip (30 challenges)
-2. **Hashcat Modes** — Correct mode number identification for all supported hash types (15 challenges)
-3. **Wordlist Attacks** — Rockyou, custom lists, targeted wordlists, CeWL (10 challenges)
-4. **Rule Attacks** — best64.rule, dive.rule, OneRuleToRuleThemAll, rule prediction (10 challenges)
-5. **Mask Attacks** — Charset creation, pattern analysis, password profiling (10 challenges)
-6. **Combinator Attacks** — Dictionary combining, hybrid workflows (5 challenges)
-7. **Hybrid Attacks** — Wordlist+Mask, Mask+Wordlist, increment, rules (10 challenges)
-8. **Wallet.dat Training** — Bitcoin/Litecoin mock wallet recovery methodology (10 challenges)
+### What Makes This Platform Different
 
-The platform features a flagship **Hashcat Playground** — an interactive cyber range with an attack builder, simulated terminal, and AI-powered learning assistant. Students earn XP, climb ranks (Script Kiddie → MOT Grandmaster), unlock achievements, compete on a global leaderboard (All-Time / Monthly / Weekly), share achievements on social media, download digital badges, and earn a premium PDF certificate upon completing all 100 challenges.
+1. **Students learn WHY, not just WHAT** — Every challenge includes educational context, progressive hints that guide without revealing answers, best practices, and defense recommendations
+2. **Anti-cheat design** — Answer randomization, progressive hints that never reveal the answer, explanations shown only after correct completion, and hash type/mode hidden until challenge is solved
+3. **Real Hashcat methodology** — Students learn the actual Hashcat CLI, mode flags, attack modes, masks, rules, and workflows used by professional penetration testers
+4. **Safe simulations** — All hashes are well-known public test vectors. No real wallets, no real cryptocurrency, no real credentials
 
 > **Educational Use Only**: All hashes are well-known public test vectors. No real wallets, no real cryptocurrency, no real credentials are used. The wallet.dat module uses 100% mock training files.
+
+---
+
+## Curriculum
+
+The platform offers **100 challenges** across **8 modules**, with 4 difficulty levels (Beginner → Intermediate → Advanced → Expert):
+
+### Module 1: Hash Identification (30 Challenges)
+
+Students learn to identify hash types by examining length, prefix, and context:
+
+| Hash Type | Length | Prefix | Hashcat Mode |
+|-----------|--------|--------|-------------|
+| MD5 | 32 hex | — | 0 |
+| SHA1 | 40 hex | — | 100 |
+| SHA256 | 64 hex | — | 1400 |
+| SHA512 | 128 hex | — | 1700 |
+| bcrypt | variable | `$2a$`, `$2b$`, `$2y$` | 3200 |
+| NTLM | 32 hex | — | 1000 |
+| LM | 32 hex | — | 3000 |
+| MySQL 5.x | 40 hex | `*` | 300 |
+| PostgreSQL | variable | `md5` | 111 |
+| SHA-3 (Keccak-256) | 64 hex | — | 17200 |
+| RIPEMD-160 | 40 hex | — | 6000 |
+| DES (Unix crypt) | 13 chars | — | 1500 |
+| md5crypt | variable | `$1$` | 500 |
+| SHA256crypt | variable | `$5$` | 7400 |
+| SHA512crypt | variable | `$6$` | 1800 |
+| MS Office 97-2003 | variable | `$oldoffice$` | 9700 |
+| MS Office 2007 | variable | `$office$*2007*` | 9710 |
+| MS Office 2013+ | variable | `$office$*2013*` | 9730 |
+| 7-Zip | variable | `$7z$` | 11600 |
+| PDF 1.7-2.0 | variable | `$pdf$5*` | 10600 |
+
+Challenges include both identification (multiple-choice) and cracking (enter the plaintext) questions.
+
+### Module 2: Hashcat Modes (15 Challenges)
+
+Students identify the correct `-m` flag for each hash type. Covers all algorithms from Module 1.
+
+### Module 3: Wordlist Attacks (10 Challenges)
+
+Topics: rockyou.txt, custom lists, CeWL, targeted wordlists, wordlist deduplication, themed wordlists.
+
+### Module 4: Rule Attacks (10 Challenges)
+
+Topics: best64.rule, dive.rule, OneRuleToRuleThemAll, rule prediction (capitalize, append digit, leetspeak, reverse, append year), custom rules, performance estimation.
+
+### Module 5: Mask Attacks (10 Challenges)
+
+Topics: charset (?d, ?l, ?u, ?a, ?s), mask construction, custom charsets (-1), `--increment`, keyspace calculation.
+
+### Module 6: Combinator Attacks (5 Challenges)
+
+Topics: `-a 1` mode, separators, three-word passphrase chaining, wordlist selection.
+
+### Module 7: Hybrid Attacks (10 Challenges)
+
+Topics: `-a 6` (Wordlist + Mask), `-a 7` (Mask + Wordlist), `--increment`, rules with hybrid, performance comparison.
+
+### Module 8: Wallet.dat Training (10 Challenges)
+
+Topics: wallet.dat file format (Berkeley DB), legacy vs modern KDF, hash extraction, attack planning, multi-stage recovery, crypto-themed wordlists. **100% mock training files — no real wallets or cryptocurrency.**
+
+### Difficulty Distribution
+
+| Difficulty | Challenges | XP Range |
+|-----------|-----------|----------|
+| Beginner | ~40 | 100-150 XP |
+| Intermediate | ~30 | 120-200 XP |
+| Advanced | ~20 | 180-280 XP |
+| Expert | ~10 | 250-500 XP |
 
 ---
 
 ## Features
 
 ### Core Platform
-- **100 Progressive Challenges** — Beginner → Intermediate → Advanced → Expert, each with scenario, objective, educational context, 4-tier progressive hint system, recommended commands, best practices, and defense recommendations
-- **Answer Randomization** — Fisher-Yates shuffle on every challenge load using crypto.getRandomValues — correct answers appear in random positions each time
-- **Progressive Hints** — Wrong answers show educational guidance, never the correct answer; explanation only revealed upon correct completion
-- **Interactive Hashcat Playground** — Visual attack builder (Config / Wordlist / Rules / Mask tabs), real-time command generator, simulated terminal with speed/progress/ETA, and an AI learning assistant
-- **Gamification** — 7 ranks, 16 achievements, XP system, global leaderboard with All-Time/Monthly/Weekly tabs and podium
-- **Social Sharing** — One-click sharing to LinkedIn, Facebook, X (Twitter), Instagram, WhatsApp, Telegram; downloadable share cards
-- **Digital Badges** — 8 downloadable PNG badges (MD5 Apprentice, Hash ID Master, Mode Specialist, Rule Wizard, Mask Master, Wallet Hunter, Hashcat Operator, MOT Grandmaster)
-- **Premium PDF Certification** — Luxury gold-bordered certificate with embossed seal, binary watermark, QR-verifiable ID, and dual signature lines
-- **Certificate Verification Portal** — Public lookup by Certificate ID or Verification Number
-- **Admin Panel** — Student management, CSV export, analytics dashboard with per-challenge completion charts
-- **Separate Register & Login** — Distinct registration and sign-in pages, each with its own button in the navbar and on the landing page
+
+- **100 Progressive Challenges** — Each with scenario, objective, educational context, 4-tier progressive hint system, recommended commands (with mode numbers hidden), best practices, and defense recommendations
+- **Interactive Hashcat Playground** — Visual attack builder with 4 tabs:
+  - **Config** — Hash type, attack mode, custom hash entry
+  - **Wordlist** — 6 built-in wordlists (rockyou subset, common passwords, leaked top 10K, corporate patterns, crypto-themed, first names)
+  - **Rules** — 4 rule sets (best64.rule, dive.rule, generated.rule, custom.rule) with example mutations
+  - **Mask** — 5 mask presets with charset legend and real-time keyspace calculation
+- **Real-time Command Generator** — Builds the Hashcat command as you configure, with copy-to-clipboard
+- **Simulated Terminal** — Beautiful terminal interface showing speed, progress, ETA, GPU utilization, and recovered passwords
+- **AI Learning Assistant** — Built-in tutor powered by z-ai-web-dev-sdk, with prompt-injection protection and system-prompt extraction prevention
+- **Premium PDF Certification** — Luxury gold-bordered certificate with embossed seal, binary watermark, QR-verifiable ID, dual signature lines, generated via jsPDF
+- **Certificate Verification Portal** — Public lookup by Certificate ID or Verification Number (no name-based enumeration)
+- **Admin Panel** — Student management with search, CSV export (with formula-injection protection), analytics dashboard with per-challenge completion charts (Recharts)
+- **Separate Register & Login Pages** — Each with its own button in the navbar and on the landing page
 - **Custom Branding** — MOT logo integrated in navbar, footer, auth pages, landing hero, and browser favicon
-- **Authentication** — Register + login with bcrypt-hashed passwords, CSRF protection, opaque session tokens
+- **Responsive Design** — Mobile-first, works on all screen sizes
+- **Cyber SOC Theme** — Dark theme (#0B0F19), cyan (#00E5FF) and green (#00FF88) accents, glassmorphism, neon highlights, matrix rain animation, cyber grid backgrounds
+
+### Anti-Cheat System
+
+The platform is designed so students must **earn** their certification through genuine understanding:
+
+- **Answer Randomization** — Fisher-Yates shuffle using `crypto.getRandomValues` on every challenge load. Correct answers appear in random positions (A/B/C/D) each time — eliminates pattern recognition
+- **Progressive Hints (4 tiers)** — Hints guide students to reference materials and analytical approaches. They NEVER reveal:
+  - The correct answer
+  - The algorithm name
+  - The mode number
+  - The password
+  - The mask pattern
+- **No Explanation on Wrong Answers** — Wrong attempts show progressive guidance messages:
+  - Attempt 1: "Incorrect. Review the challenge materials and try again."
+  - Attempt 2: "Incorrect. Take a closer look at the educational context above."
+  - Attempt 3: "Incorrect. Consider reviewing the recommended commands and best practices."
+  - Attempt 4: "Incorrect. Would you like to revisit the lesson?"
+- **Explanation Only After Correct Answer** — The full explanation (which contains the answer) is shown ONLY when the student answers correctly
+- **Hidden Hash Type & Mode** — The hash type label shows "Unknown Hash" and the Hashcat mode badge is hidden until the challenge is completed
+- **Hidden Educational Context** — The educational context (which may reference the algorithm by name) is hidden until the challenge is completed
+- **No Answer in Recommended Commands** — All commands use `hashcat -m <hash_type>` instead of actual mode numbers
+- **No Algorithm Names in Titles** — Challenge titles describe the hash characteristics, not the algorithm name (e.g., "Identify This 32-Character Hash" instead of "Identify MD5")
+- **No Algorithm Names in Scenarios** — Scenarios describe the context without naming the algorithm
+
+### Gamification & Social
+
+- **7 Ranks** — Script Kiddie → Apprentice Cracker → Hash Hunter → Password Slayer → Crypto Recovery Specialist → Elite Hashcat Operator → MOT Grandmaster
+- **16 Achievements** — Module-specific badges (Hash ID Master, Mode Specialist, Rule Wizard, etc.) plus progressive achievements (First Blood, Halfway There, Flawless, MOT Grandmaster)
+- **XP System** — Challenges award 100-500 XP; Playground sessions award 10 XP each
+- **Global Leaderboard** — Three time-period tabs:
+  - **All-Time** — All students ranked by total XP
+  - **Monthly** — Students active in the last 30 days
+  - **Weekly** — Students active in the last 7 days
+- **Social Sharing** — One-click sharing to 6 platforms:
+  - LinkedIn, Facebook, X (Twitter), Instagram, WhatsApp, Telegram
+  - Pre-filled message with student name, module completed, XP earned, rank, and hashtags
+  - Downloadable share card as PNG (canvas-generated with cyber theme)
+- **Digital Badges** — 8 downloadable PNG badges:
+  - Hash ID Apprentice, Hash ID Master, Mode Specialist, Rule Wizard, Mask Master, Wallet Hunter, Hashcat Operator, MOT Grandmaster
+  - Canvas-generated with badge design, student name, and platform branding
 
 ### Security Hardened
-- bcrypt password hashing (10 rounds)
-- CSRF protection on all mutating endpoints (double-submit token pattern)
-- Rate limiting (per-IP and per-account) — no X-Forwarded-For trust
-- Input validation and sanitization on every endpoint
-- Security headers (CSP, X-Frame-Options, HSTS, COOP, CORP, Permissions-Policy)
-- Body size limits (64 KB)
-- Opaque session tokens (no embedded user data)
-- Case-insensitive username uniqueness with Latin-only character validation
-- Prisma configured as server-external package (prevents Turbopack bundling errors)
+
+The platform has been **penetration-tested by 10 parallel pentest agents** and hardened against all found vulnerabilities:
+
+| Protection | Implementation |
+|------------|---------------|
+| **Password Hashing** | bcrypt (10 rounds), precomputed dummy hash for timing equalization |
+| **CSRF Protection** | Double-submit token on all mutating endpoints (constant-time comparison) |
+| **Rate Limiting** | Per-IP (10-60 req/min depending on endpoint) + per-account (5 failed logins / 15 min). Uses socket peer IP, NOT X-Forwarded-For |
+| **Session Management** | Opaque tokens (64-char hex, no embedded user data), 12-hour inactivity TTL, server-side invalidation on logout |
+| **Input Validation** | Strict type checking, length limits, Latin-only names (rejects homoglyphs), email format enforcement, integer validation |
+| **SQL Injection** | Prisma ORM with parameterized queries (zero raw SQL) |
+| **XSS Protection** | React JSX auto-escaping, strict CSP (no unsafe-eval), no dangerouslySetInnerHTML in app code |
+| **Security Headers** | CSP, X-Frame-Options: DENY, X-XSS-Protection, HSTS, COOP, CORP, Permissions-Policy, Referrer-Policy |
+| **Body Size Limit** | 64 KB max request body (Content-Length check before parsing) |
+| **Content-Type Enforcement** | All POST/PATCH endpoints require `Content-Type: application/json` |
+| **Certificate Security** | CSPRNG-generated IDs (32^8 keyspace), no name-based enumeration |
+| **AI Tutor Hardening** | System prompt extraction prevention, prompt-injection pattern filtering, response post-filtering |
+| **CSV Formula Injection** | Export prefixes cells starting with `=+-@\t\r` with single quote |
+| **Prisma Turbopack Fix** | `serverExternalPackages` config prevents `Cannot find module @prisma/client-<hash>` error |
 
 ---
 
@@ -89,12 +223,13 @@ The platform features a flagship **Hashcat Playground** — an interactive cyber
 | **Styling** | Tailwind CSS 4, shadcn/ui (New York), Framer Motion |
 | **Backend** | Next.js API Routes (Node.js runtime) |
 | **Database** | Prisma ORM + SQLite |
-| **State** | Zustand (client), TanStack Query (server) |
+| **State Management** | Zustand (client state with persist middleware) |
 | **Charts** | Recharts |
-| **PDF** | jsPDF |
+| **PDF Generation** | jsPDF |
 | **AI Tutor** | z-ai-web-dev-sdk |
 | **Icons** | Lucide React |
 | **Runtime** | Bun (recommended) or Node.js 20+ |
+| **Security** | bcryptjs, custom rate limiter, CSRF tokens, CSP headers |
 
 ---
 
@@ -103,57 +238,63 @@ The platform features a flagship **Hashcat Playground** — an interactive cyber
 ```
 mot-hashcat-playground/
 ├── prisma/
-│   └── schema.prisma              # Database schema (Student, ChallengeResult, Certificate, etc.)
-├── public/                        # Static assets
+│   └── schema.prisma                # Database schema (Student, ChallengeResult, Certificate, etc.)
+├── public/
+│   └── mot-logo.jpg                 # MOT brand logo
 ├── scripts/
-│   ├── mark-complete.ts           # Dev utility: mark all challenges complete
-│   └── check-students.ts          # Dev utility: list students
+│   ├── generate-challenges.py       # Generates the 100-challenge data file
+│   ├── mark-complete.ts             # Dev utility: mark all challenges complete
+│   ├── check-students.ts            # Dev utility: list students
+│   └── e2e-test.py                  # End-to-end API tests
 ├── src/
 │   ├── app/
-│   │   ├── api/                   # API routes
-│   │   │   ├── auth/              # Register, login, logout
-│   │   │   ├── student/           # Dashboard data
-│   │   │   ├── progress/          # Challenge submission + hint tracking
-│   │   │   ├── playground/        # Playground session logging
-│   │   │   ├── playground-tutor/  # AI tutor endpoint
-│   │   │   ├── certificate/       # Certificate generation
-│   │   │   ├── verify/[id]/       # Public certificate verification
-│   │   │   ├── leaderboard/       # Public leaderboard
-│   │   │   ├── challenges/        # Public challenge list
-│   │   │   └── admin/             # Admin-only endpoints
-│   │   ├── globals.css            # Global styles + cyber theme
-│   │   ├── layout.tsx             # Root layout
-│   │   └── page.tsx               # Main page (view router)
+│   │   ├── api/                     # API routes (all rate-limited, validated)
+│   │   │   ├── auth/                # Register, login, logout (bcrypt, CSRF, opaque tokens)
+│   │   │   ├── student/             # Dashboard data (8-module progress)
+│   │   │   ├── progress/            # Challenge submission + 4-tier hint tracking
+│   │   │   ├── playground/          # Playground session logging (+10 XP)
+│   │   │   ├── playground-tutor/    # AI tutor (prompt-injection hardened)
+│   │   │   ├── certificate/         # Certificate generation (100-challenge gate)
+│   │   │   ├── verify/[id]/         # Public cert verification (ID + verification number only)
+│   │   │   ├── leaderboard/         # Public leaderboard (all/monthly/weekly tabs)
+│   │   │   ├── challenges/          # Public challenge list
+│   │   │   └── admin/               # Admin-only (student mgmt, analytics, CSV export)
+│   │   ├── globals.css              # Global styles + cyber SOC theme
+│   │   ├── layout.tsx               # Root layout (fonts, metadata, logo favicon)
+│   │   └── page.tsx                 # Main page (client-side view router)
 │   ├── components/
-│   │   ├── auth/                  # AuthView (register/login)
-│   │   ├── dashboard/             # Student dashboard
-│   │   ├── challenges/            # Challenges list + detail
-│   │   ├── playground/            # Hashcat Playground
-│   │   ├── leaderboard/           # Leaderboard view
-│   │   ├── achievements/          # Achievements + ranks
-│   │   ├── certificate/           # Certificate view + PDF download
-│   │   ├── verify/                # Public verification portal
-│   │   ├── admin/                 # Admin panel
-│   │   ├── landing/               # Landing page
-│   │   ├── layout/                # Navbar, Footer, CyberGridBackground
-│   │   └── ui/                    # shadcn/ui components
+│   │   ├── auth/                    # AuthView (separate register/login modes)
+│   │   ├── dashboard/               # Student dashboard (stats, progress, activity)
+│   │   ├── challenges/              # Challenges list + detail (answer shuffle, progressive hints)
+│   │   ├── playground/              # Hashcat Playground (attack builder, terminal, AI tutor)
+│   │   ├── leaderboard/             # Leaderboard (all-time/monthly/weekly tabs, podium)
+│   │   ├── achievements/            # Achievements + ranks + digital badges
+│   │   ├── certificate/             # Certificate view + PDF download
+│   │   ├── verify/                  # Public verification portal
+│   │   ├── admin/                   # Admin panel (students, analytics, CSV, cert verify dialog)
+│   │   ├── landing/                 # Landing page (hero, features, curriculum, FAQ)
+│   │   ├── layout/                  # Navbar, Footer, CyberGridBackground (matrix animation)
+│   │   ├── shared/                  # ShareCard (social sharing), DigitalBadges (PNG download)
+│   │   └── ui/                      # shadcn/ui component library
 │   ├── hooks/
-│   │   └── useDashboardData.ts    # Dashboard data fetch hook
+│   │   └── useDashboardData.ts      # Dashboard data fetch hook (auto-refresh)
 │   ├── lib/
-│   │   ├── security.ts            # Auth, rate limiting, validation, sanitization
-│   │   ├── api-client.ts          # Authenticated fetch helper
-│   │   ├── store.ts               # Zustand stores (app state + session)
-│   │   ├── challenges-data.ts     # 20 challenge definitions
-│   │   ├── achievements-data.ts   # 7 ranks + 12 achievements
-│   │   ├── hashcat-data.ts        # Wordlists, rules, masks, attack modes
-│   │   ├── certificate-pdf.ts     # PDF certificate generator
-│   │   ├── db.ts                  # Prisma client
-│   │   └── utils.ts               # Utility functions
-│   └── proxy.ts                   # Security headers middleware
-├── .env.example                   # Environment variable template
-├── next.config.ts                 # Next.js configuration
-├── package.json                   # Dependencies and scripts
-└── README.md                      # This file
+│   │   ├── security.ts              # bcrypt, rate limiting, validation, sanitization, body parsing
+│   │   ├── api-client.ts            # Authenticated fetch helper (Bearer + CSRF headers)
+│   │   ├── store.ts                 # Zustand stores (view router + persisted session)
+│   │   ├── challenges-data.ts       # 100 challenge definitions (8 modules, 4 difficulties)
+│   │   ├── achievements-data.ts     # 7 ranks + 16 achievements
+│   │   ├── hashcat-data.ts          # Wordlists, rules, masks, attack modes reference
+│   │   ├── certificate-pdf.ts       # PDF certificate generator (jsPDF)
+│   │   ├── db.ts                    # Prisma client (globalThis singleton)
+│   │   └── utils.ts                 # Utility functions (cn, etc.)
+│   └── proxy.ts                     # Security headers proxy (CSP, HSTS, TRACE block)
+├── .env.example                     # Environment variable template
+├── .gitignore                       # Git ignore rules
+├── next.config.ts                   # Next.js config (serverExternalPackages, poweredByHeader)
+├── package.json                     # Dependencies and scripts (postinstall: prisma generate)
+├── LICENSE                          # MIT License
+└── README.md                        # This file
 ```
 
 ---
@@ -232,7 +373,6 @@ npm --version
 #### Step 3: Clone the Repository
 
 ```bash
-# Clone to your preferred directory
 cd ~
 git clone https://github.com/cysec-don/mot-hashcat-playground.git
 cd mot-hashcat-playground
@@ -258,8 +398,6 @@ cp .env.example .env
 
 # The default DATABASE_URL points to ./db/custom.db
 # No changes needed for local development
-# If you want a custom database path, edit .env:
-#   nano .env
 ```
 
 #### Step 6: Initialize the Database
@@ -291,76 +429,50 @@ The application will be available at **http://localhost:3000**.
 #### Step 1: Install System Dependencies
 
 ```bash
-# Update system
 sudo dnf update -y
-
-# Install build tools and Git
 sudo dnf install -y gcc gcc-c++ make git curl unzip
 ```
 
 #### Step 2: Install Bun (Recommended)
 
 ```bash
-# Install Bun
 curl -fsSL https://bun.sh/install | bash
-
-# Add Bun to PATH
 echo 'export BUN_INSTALL="$HOME/.bun"' >> ~/.bashrc
 echo 'export PATH="$BUN_INSTALL/bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
-
-# Verify
 bun --version
 ```
 
-#### Alternative: Install Node.js 20+ (if you prefer npm)
+#### Alternative: Install Node.js 20+
 
 ```bash
-# Install Node.js via NodeSource
 curl -fsSL https://rpm.nodesource.com/setup_20.x | sudo bash -
 sudo dnf install -y nodejs
-
-# Verify
 node --version
 npm --version
 ```
 
-#### Step 3: Clone the Repository
+#### Step 3: Clone and Install
 
 ```bash
 cd ~
 git clone https://github.com/cysec-don/mot-hashcat-playground.git
 cd mot-hashcat-playground
+bun install   # OR: npm install
 ```
 
-#### Step 4: Install Dependencies
+> **Note**: The `postinstall` script automatically runs `prisma generate`. If it doesn't, run `bun run db:generate` manually.
 
-```bash
-# Using Bun
-bun install
-
-# OR using npm
-npm install
-```
-
-> **Note**: The `postinstall` script automatically runs `prisma generate` after install. If it doesn't run, execute `bun run db:generate` manually.
-
-#### Step 5: Configure Environment
+#### Step 4: Configure and Initialize
 
 ```bash
 cp .env.example .env
-```
-
-#### Step 6: Initialize the Database
-
-```bash
-# Create the database schema (also regenerates the Prisma client)
 bun run db:push
 ```
 
-> **Note**: If you see a Prisma module error like `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate` to regenerate the client.
+> **Note**: If you see `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate`.
 
-#### Step 7: Start the Development Server
+#### Step 5: Start the Server
 
 ```bash
 bun run dev
@@ -375,75 +487,49 @@ Open **http://localhost:3000** in your browser.
 #### Step 1: Install System Dependencies
 
 ```bash
-# Update system
 sudo pacman -Syu
-
-# Install base-devel, Git, curl, and unzip
 sudo pacman -S --needed base-devel git curl unzip
 ```
 
 #### Step 2: Install Bun (Recommended)
 
 ```bash
-# Install Bun
 curl -fsSL https://bun.sh/install | bash
-
-# Add Bun to PATH
 echo 'export BUN_INSTALL="$HOME/.bun"' >> ~/.bashrc
 echo 'export PATH="$BUN_INSTALL/bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
-
-# Verify
 bun --version
 ```
 
-#### Alternative: Install Node.js 20+ (if you prefer npm)
+#### Alternative: Install Node.js 20+
 
 ```bash
-# Arch repos have the latest Node.js
 sudo pacman -S nodejs npm
-
-# Verify
 node --version
 npm --version
 ```
 
-#### Step 3: Clone the Repository
+#### Step 3: Clone and Install
 
 ```bash
 cd ~
 git clone https://github.com/cysec-don/mot-hashcat-playground.git
 cd mot-hashcat-playground
+bun install   # OR: npm install
 ```
 
-#### Step 4: Install Dependencies
+> **Note**: The `postinstall` script automatically runs `prisma generate`. If it doesn't, run `bun run db:generate` manually.
 
-```bash
-# Using Bun
-bun install
-
-# OR using npm
-npm install
-```
-
-> **Note**: The `postinstall` script automatically runs `prisma generate` after install. If it doesn't run, execute `bun run db:generate` manually.
-
-#### Step 5: Configure Environment
+#### Step 4: Configure and Initialize
 
 ```bash
 cp .env.example .env
-```
-
-#### Step 6: Initialize the Database
-
-```bash
-# Create the database schema (also regenerates the Prisma client)
 bun run db:push
 ```
 
-> **Note**: If you see a Prisma module error like `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate` to regenerate the client.
+> **Note**: If you see `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate`.
 
-#### Step 7: Start the Development Server
+#### Step 5: Start the Server
 
 ```bash
 bun run dev
@@ -459,38 +545,27 @@ Open **http://localhost:3000** in your browser.
 
 1. Download Git for Windows from **https://git-scm.com/download/win**
 2. Run the installer with default settings
-3. Open **Git Bash** (installed with Git) or **PowerShell**
+3. Open **Git Bash** or **PowerShell**
 
-#### Step 2: Install Bun (Recommended) or Node.js
+#### Step 2: Install Bun or Node.js
 
 **Option A: Install Bun**
 
-1. Open PowerShell as Administrator
-2. Run:
-   ```powershell
-   powershell -c "irm bun.sh/install.ps1 | iex"
-   ```
-3. Close and reopen your terminal
-4. Verify:
-   ```powershell
-   bun --version
-   ```
+```powershell
+powershell -c "irm bun.sh/install.ps1 | iex"
+```
+Close and reopen your terminal, then verify: `bun --version`
 
 **Option B: Install Node.js 20+**
 
 1. Download the LTS installer from **https://nodejs.org/**
 2. Run the installer (select "Add to PATH")
 3. Restart your terminal
-4. Verify:
-   ```powershell
-   node --version
-   npm --version
-   ```
+4. Verify: `node --version` and `npm --version`
 
 #### Step 3: Clone the Repository
 
 ```powershell
-# In PowerShell or Git Bash
 cd $HOME
 git clone https://github.com/cysec-don/mot-hashcat-playground.git
 cd mot-hashcat-playground
@@ -499,45 +574,29 @@ cd mot-hashcat-playground
 #### Step 4: Install Dependencies
 
 ```powershell
-# Using Bun
-bun install
-
-# OR using npm
-npm install
+bun install   # OR: npm install
 ```
 
-> **Note**: The `postinstall` script automatically runs `prisma generate` after install. If it doesn't run, execute `bun run db:generate` (or `npx prisma generate`) manually.
+> **Note**: The `postinstall` script automatically runs `prisma generate`. If it doesn't, run `bun run db:generate` (or `npx prisma generate`) manually.
 
 #### Step 5: Configure Environment
 
 ```powershell
-# Copy the example environment file
 Copy-Item .env.example .env
-
-# The default DATABASE_URL is file:./db/custom.db
-# This works on Windows — just use forward slashes
 ```
 
 #### Step 6: Initialize the Database
 
 ```powershell
-# Using Bun
-bun run db:push
-
-# OR using npm
-npx prisma db push
+bun run db:push   # OR: npx prisma db push
 ```
 
-> **Note**: If you see a Prisma module error like `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate` (or `npx prisma generate`) to regenerate the client.
+> **Note**: If you see `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate` (or `npx prisma generate`).
 
 #### Step 7: Start the Development Server
 
 ```powershell
-# Using Bun
-bun run dev
-
-# OR using npm
-npm run dev
+bun run dev   # OR: npm run dev
 ```
 
 Open **http://localhost:3000** in your browser.
@@ -551,90 +610,62 @@ Open **http://localhost:3000** in your browser.
 
 ### macOS
 
-#### Step 1: Install Homebrew (if not already installed)
+#### Step 1: Install Homebrew
 
 ```bash
-# Install Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# Add Homebrew to PATH (Apple Silicon)
 echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
 eval "$(/opt/homebrew/bin/brew shellenv)"
-
-# Verify
 brew --version
 ```
 
 #### Step 2: Install System Dependencies
 
 ```bash
-# Install Git (comes with Xcode Command Line Tools, but explicit install is safer)
 brew install git curl unzip
 ```
 
-#### Step 3: Install Bun (Recommended) or Node.js
+#### Step 3: Install Bun or Node.js
 
 **Option A: Install Bun**
 
 ```bash
-# Install Bun
 curl -fsSL https://bun.sh/install | bash
-
-# Add Bun to PATH
 echo 'export BUN_INSTALL="$HOME/.bun"' >> ~/.zshrc
 echo 'export PATH="$BUN_INSTALL/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc
-
-# Verify
 bun --version
 ```
 
-**Option B: Install Node.js 20+ via Homebrew**
+**Option B: Install Node.js via Homebrew**
 
 ```bash
 brew install node
-
-# Verify
 node --version
 npm --version
 ```
 
-#### Step 4: Clone the Repository
+#### Step 4: Clone and Install
 
 ```bash
 cd ~
 git clone https://github.com/cysec-don/mot-hashcat-playground.git
 cd mot-hashcat-playground
+bun install   # OR: npm install
 ```
 
-#### Step 5: Install Dependencies
+> **Note**: The `postinstall` script automatically runs `prisma generate`. If it doesn't, run `bun run db:generate` manually.
 
-```bash
-# Using Bun
-bun install
-
-# OR using npm
-npm install
-```
-
-> **Note**: The `postinstall` script automatically runs `prisma generate` after install. If it doesn't run, execute `bun run db:generate` manually.
-
-#### Step 6: Configure Environment
+#### Step 5: Configure and Initialize
 
 ```bash
 cp .env.example .env
-```
-
-#### Step 7: Initialize the Database
-
-```bash
-# Create the database schema (also regenerates the Prisma client)
 bun run db:push
 ```
 
-> **Note**: If you see a Prisma module error like `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate` to regenerate the client.
+> **Note**: If you see `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate`.
 
-#### Step 8: Start the Development Server
+#### Step 6: Start the Server
 
 ```bash
 bun run dev
@@ -708,14 +739,15 @@ bun run start
    - The navbar also has separate "Register" and "Sign In" buttons
 3. **Register** with your Full Name and a strong password
    - Password requirements: min 8 chars, must include upper/lower case, a digit, and a special character
+   - Full Name: Latin letters only (A-Z, a-z), spaces, hyphens, apostrophes, periods
    - The first registered user automatically becomes the admin
 4. **Start challenges** from the Dashboard — begin with Module 1 (Hash Identification)
 
 ### Admin Access
 
 The first user to register is automatically granted admin privileges. Admins can:
-- View all students
-- Export student data as CSV
+- View all students with search
+- Export student data as CSV (with formula-injection protection)
 - View analytics (per-challenge completion rates, top students)
 - Reset any non-admin student's progress
 - Verify certificates via the admin dialog
@@ -736,53 +768,62 @@ The platform has **separate Register and Login pages**:
 
 1. **Register** with your full name (Latin letters only) and a password (min 8 chars, must include upper/lower/digit/special)
 2. **Complete Challenges** — Start with Module 1 (Hash Identification), progress through all 8 modules
-3. **Use Hints** — Each challenge has 3 progressive hints (using hints doesn't block progress)
-4. **Practice** in the Hashcat Playground — experiment with attack modes, wordlists, rules, and masks
-5. **Ask the AI Tutor** — Built into the Playground, explains concepts and suggests strategies
-6. **Climb the Leaderboard** — Earn XP from challenges (100-500 XP each) and playground sessions (10 XP each)
-7. **Earn Achievements** — 12 achievements unlock automatically as you progress
-8. **Get Certified** — Complete all 100 challenges to unlock your premium PDF certificate
+3. **Use Progressive Hints** — Each challenge has 4 progressive hints that guide without revealing the answer. Using hints doesn't block progress but reduces your "perfect score" achievement count
+4. **Wrong Answers** — You'll never see the correct answer on a wrong attempt. Instead, you'll get progressive guidance messages that encourage you to review the materials
+5. **Practice** in the Hashcat Playground — experiment with attack modes, wordlists, rules, and masks. Earn 10 XP per session
+6. **Ask the AI Tutor** — Built into the Playground, explains concepts and suggests strategies. The tutor is hardened against prompt-injection and system-prompt extraction
+7. **Climb the Leaderboard** — Earn XP from challenges (100-500 XP each) and playground sessions (10 XP each). Check the All-Time, Monthly, and Weekly tabs
+8. **Earn Achievements** — 16 achievements unlock automatically as you progress
+9. **Share Achievements** — Click "Share" after completing a challenge to share on LinkedIn, Facebook, X, Instagram, WhatsApp, or Telegram. Download a share card as PNG
+10. **Download Badges** — Visit the Achievements page to download digital badges as PNG
+11. **Get Certified** — Complete all 100 challenges to unlock your premium PDF certificate
 
 ### For Administrators
 
 1. **Access Admin Panel** — Click "Admin" in the navbar (visible only to admins)
 2. **Monitor Students** — View the student table with search and CSV export
-3. **View Analytics** — See per-challenge completion rates and top students
-4. **Verify Certificates** — Use the "Verify Certificate" dialog to check any certificate
-5. **Manage Progress** — Reset any non-admin student's progress if needed
+3. **View Analytics** — See per-challenge completion rates (bar chart) and top students
+4. **Verify Certificates** — Use the "Verify Certificate" dialog to check any certificate by ID or verification number
+5. **Manage Progress** — Reset any non-admin student's progress if needed (cannot reset own progress or other admins')
 
 ### For Employers / Verifiers
 
-1. **Visit** the Certificate Verification portal (accessible from the navbar)
+1. **Visit** the Certificate Verification portal (accessible from the navbar — "Verify")
 2. **Enter** the Certificate ID or Verification Number from the student's PDF
 3. **Verify** — The system confirms whether the certificate was issued by this platform
+4. **Note** — Verification by student name is intentionally disabled to prevent certificate enumeration
 
 ---
 
 ## Security
 
-MOT Hashcat Playground has been penetration-tested and hardened against common web vulnerabilities:
+MOT Hashcat Playground has been penetration-tested by 10 parallel pentest agents and hardened against all found vulnerabilities:
 
 | Protection | Implementation |
 |------------|---------------|
-| **Password Hashing** | bcrypt (10 rounds) |
-| **CSRF Protection** | Double-submit token on all mutating endpoints |
-| **Rate Limiting** | Per-IP (10-60 req/min depending on endpoint) + per-account (5 failed logins / 15 min) |
-| **Session Management** | Opaque tokens, 12-hour inactivity TTL, server-side invalidation |
-| **Input Validation** | Strict type checking, length limits, Latin-only names, email format enforcement |
-| **SQL Injection** | Prisma ORM with parameterized queries (zero raw SQL) |
-| **XSS Protection** | React JSX auto-escaping, strict CSP (no unsafe-eval) |
-| **Security Headers** | CSP, X-Frame-Options: DENY, HSTS, COOP, CORP, Permissions-Policy |
-| **Body Size Limit** | 64 KB max request body |
+| **Password Hashing** | bcrypt (10 rounds), precomputed dummy hash for timing equalization on bad-credential login |
+| **CSRF Protection** | Double-submit token on all mutating endpoints (constant-time comparison) |
+| **Rate Limiting** | Per-IP (10-60 req/min depending on endpoint) + per-account (5 failed logins / 15 min). Uses socket peer IP, NOT X-Forwarded-For |
+| **Session Management** | Opaque tokens (64-char hex, no embedded user data), 12-hour inactivity TTL, server-side invalidation on logout, Map size cap with LRU eviction |
+| **Input Validation** | Strict type checking, length limits, Latin-only names (rejects homoglyphs), email format enforcement, integer validation (Number.isInteger), null/non-object body rejection |
+| **SQL Injection** | Prisma ORM with parameterized queries (zero raw SQL, zero $queryRaw) |
+| **XSS Protection** | React JSX auto-escaping, strict CSP (no unsafe-eval), no dangerouslySetInnerHTML in app code |
+| **Security Headers** | CSP, X-Frame-Options: DENY, X-XSS-Protection, HSTS, COOP, CORP, Permissions-Policy, Referrer-Policy |
+| **Body Size Limit** | 64 KB max request body (Content-Length check before parsing) |
+| **Content-Type Enforcement** | All POST/PATCH endpoints require `Content-Type: application/json` |
 | **Certificate Security** | CSPRNG-generated IDs (32^8 keyspace), no name-based enumeration |
+| **AI Tutor Hardening** | System prompt extraction prevention, prompt-injection pattern filtering, response post-filtering |
+| **CSV Formula Injection** | Export prefixes cells starting with `=+-@\t\r` with single quote |
+| **Prisma Turbopack Fix** | `serverExternalPackages` config prevents `Cannot find module @prisma/client-<hash>` error |
 
 ### Security Best Practices for Production Deployment
 
 1. **Use HTTPS** — Always deploy behind a reverse proxy (Caddy, Nginx) with TLS
-2. **Set `NODE_ENV=production`** — Enables production optimizations
+2. **Set `NODE_ENV=production`** — Enables production optimizations and disables source maps
 3. **Regular Backups** — Back up the SQLite database file regularly
-4. **Monitor Logs** — Watch for rate-limit violations and error patterns
+4. **Monitor Logs** — Watch for rate-limit violations (429 responses) and error patterns
 5. **Rotate Secrets** — If you add JWT or session secrets, rotate them periodically
+6. **Database Migration** — For production, consider switching from SQLite to PostgreSQL
 
 ---
 
@@ -873,6 +914,25 @@ Example Caddyfile:
 mot-hashcat.example.com {
     reverse_proxy localhost:3000
 }
+```
+
+Example systemd service (`/etc/systemd/system/mot-hashcat.service`):
+
+```ini
+[Unit]
+Description=MOT Hashcat Playground
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/mot-hashcat-playground
+ExecStart=/home/www-data/.bun/bin/bun run start
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
 ```
 
 ---
@@ -990,6 +1050,10 @@ The platform enforces Latin-only characters (A-Z, a-z) in full names to prevent 
 - `Тest Operator` ❌ (contains Cyrillic Т)
 - `Test_User` ❌ (underscore not allowed)
 
+#### Hydration mismatch error
+
+If you see a "Hydration failed because the server rendered text didn't match the client" error, it's likely caused by `Math.random()` in a server-rendered component. This project uses deterministic patterns instead of `Math.random()` for any server-rendered content. If you add new components, avoid `Math.random()` in the render path — use it only inside `useEffect`.
+
 ---
 
 ### Getting Help
@@ -1001,6 +1065,7 @@ If you encounter issues not covered here:
 3. Verify your Node.js/Bun version meets the prerequisites
 4. Ensure all environment variables are set correctly
 5. Try deleting `node_modules` and reinstalling: `rm -rf node_modules && bun install`
+6. Check the [GitHub repository](https://github.com/cysec-don/mot-hashcat-playground) for issues
 
 ---
 
@@ -1017,6 +1082,8 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 - **rockyou.txt** — The legendary wordlist used in educational examples
 - **shadcn/ui** — The component library powering the UI
 - **Next.js team** — The framework this platform is built on
+- **Prisma** — The ORM that makes database interactions safe and type-safe
+- **z-ai-web-dev-sdk** — Powering the AI Learning Assistant
 
 ---
 
@@ -1025,6 +1092,8 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 **MOT Hashcat Playground**
 
 Master Password Recovery. Master Hashcat. Master the Art of Cracking.
+
+100 Challenges · 8 Modules · 7 Ranks · 16 Achievements · Social Sharing · Digital Badges · PDF Certification
 
 Educational simulations only. No real wallets, no real cryptocurrency, no real credentials.
 
