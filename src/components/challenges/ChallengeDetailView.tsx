@@ -235,15 +235,15 @@ export function ChallengeDetailView() {
             <p className="text-sm text-slate-300 leading-relaxed">{challenge.objective}</p>
           </Card>
 
-          {/* Hash (if applicable) */}
+          {/* Hash (if applicable) — hide hashType and hashcatMode until completed */}
           {challenge.hash && (
             <Card className="cyber-card p-6">
               <div className="flex items-center gap-2 mb-3">
                 <Lock className="h-4 w-4 text-amber-400" />
                 <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                  {challenge.hashType || "Hash"}
+                  {(alreadyCompleted || result?.correct) ? (challenge.hashType || "Hash") : "Unknown Hash"}
                 </h2>
-                {challenge.hashcatMode !== undefined && (
+                {(alreadyCompleted || result?.correct) && challenge.hashcatMode !== undefined && (
                   <Badge variant="outline" className="text-[10px] border-cyan-500/30 text-cyan-300 ml-auto">
                     Hashcat -m {challenge.hashcatMode}
                   </Badge>
@@ -269,14 +269,16 @@ export function ChallengeDetailView() {
             </Card>
           )}
 
-          {/* Educational context */}
-          <Card className="cyber-card p-6">
-            <div className="flex items-center gap-2 mb-3">
-              <BookOpen className="h-4 w-4 text-violet-400" />
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider">Educational Context</h2>
-            </div>
-            <p className="text-sm text-slate-300 leading-relaxed">{challenge.educationalContext}</p>
-          </Card>
+          {/* Educational context — hidden until challenge is completed to prevent answer leakage */}
+          {(alreadyCompleted || result?.correct) && (
+            <Card className="cyber-card p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <BookOpen className="h-4 w-4 text-violet-400" />
+                <h2 className="text-sm font-bold text-white uppercase tracking-wider">Educational Context</h2>
+              </div>
+              <p className="text-sm text-slate-300 leading-relaxed">{challenge.educationalContext}</p>
+            </Card>
+          )}
 
           {/* Answer area */}
           <Card className="cyber-card p-6">
