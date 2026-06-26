@@ -24,6 +24,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { generateCertificatePDF } from "@/lib/certificate-pdf";
 import { apiFetch } from "@/lib/api-client";
 
+// Deterministic binary pattern for certificate background (prevents hydration mismatch)
+const CERT_BINARY_PATTERN: string[] = Array.from({ length: 250 }, (_, i) => {
+  let s = "";
+  for (let j = 0; j < 40; j++) {
+    s += ((i * 7 + j * 13) % 3 === 0) ? "1" : "0";
+  }
+  return s;
+});
+
 export function CertificateView() {
   const { student } = useSession();
   const { setView } = useApp();
@@ -382,21 +391,15 @@ function CertificatePreview({
         </div>
       </div>
 
-      {/* Binary background */}
+      {/* Binary background — deterministic to prevent hydration mismatch */}
       <div
         className="absolute inset-0 opacity-[0.05] flex flex-wrap content-start font-mono text-amber-200 text-[8px] leading-none p-8 pointer-events-none select-none"
       >
-        {Array.from({ length: 250 })
-          .map(() =>
-            Array.from({ length: 40 })
-              .map(() => (Math.random() > 0.5 ? "1" : "0"))
-              .join("")
-          )
-          .map((s, i) => (
-            <div key={i} className="mr-2">
-              {s}
-            </div>
-          ))}
+        {CERT_BINARY_PATTERN.map((s, i) => (
+          <div key={i} className="mr-2">
+            {s}
+          </div>
+        ))}
       </div>
 
       {/* Watermark */}
