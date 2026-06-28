@@ -54,6 +54,7 @@ server.log
 # Database
 /db/*.db
 /db/*.db-journal
+!/db/.gitkeep
 
 # Downloaded files
 /download/

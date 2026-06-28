@@ -388,7 +388,7 @@ bun install
 npm install
 ```
 
-> **Note**: The `postinstall` script automatically runs `prisma generate` after dependencies are installed. This creates the Prisma client library needed by the app. If it doesn't run automatically, execute `bun run db:generate` manually.
+> **Note**: The `postinstall` script automatically runs `mkdir -p db && prisma generate` — it creates the `db/` directory and generates the Prisma client. If it doesn't run automatically, execute `bun run db:generate` manually.
 
 #### Step 5: Configure Environment
 
@@ -396,7 +396,8 @@ npm install
 # Copy the example environment file
 cp .env.example .env
 
-# The default DATABASE_URL points to ./db/custom.db
+# The default DATABASE_URL is file:./db/custom.db
+# The db/ directory is created automatically by postinstall
 # No changes needed for local development
 ```
 
@@ -407,6 +408,8 @@ cp .env.example .env
 bun run db:push
 # OR: npx prisma db push
 ```
+
+> **Note**: If you see a Prisma module error, the `predev` script handles this automatically. See [Troubleshooting](#cannot-find-module-prismaclient-hash-turbopack-error) for manual steps.
 
 > **Note**: If you see a Prisma module error like `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate` to regenerate the client. The project uses `require()` instead of `import` in `db.ts` and includes a `predev` script that auto-clears the `.next` cache — see [Troubleshooting](#cannot-find-module-prismaclient-hash-turbopack-error) for details.
 
@@ -461,7 +464,7 @@ cd mot-hashcat-playground
 bun install   # OR: npm install
 ```
 
-> **Note**: The `postinstall` script automatically runs `prisma generate`. If it doesn't, run `bun run db:generate` manually.
+> **Note**: The `postinstall` script runs `mkdir -p db && prisma generate` automatically. If it doesn't, run `bun run db:generate` manually.
 
 #### Step 4: Configure and Initialize
 
@@ -519,7 +522,7 @@ cd mot-hashcat-playground
 bun install   # OR: npm install
 ```
 
-> **Note**: The `postinstall` script automatically runs `prisma generate`. If it doesn't, run `bun run db:generate` manually.
+> **Note**: The `postinstall` script runs `mkdir -p db && prisma generate` automatically. If it doesn't, run `bun run db:generate` manually.
 
 #### Step 4: Configure and Initialize
 
@@ -579,7 +582,7 @@ cd mot-hashcat-playground
 bun install   # OR: npm install
 ```
 
-> **Note**: The `postinstall` script automatically runs `prisma generate`. If it doesn't, run `bun run db:generate` (or `npx prisma generate`) manually.
+> **Note**: The `postinstall` script runs `mkdir -p db && prisma generate` automatically. If it doesn't, run `bun run db:generate` (or `npx prisma generate`) manually.
 
 #### Step 5: Configure Environment
 
@@ -657,7 +660,7 @@ cd mot-hashcat-playground
 bun install   # OR: npm install
 ```
 
-> **Note**: The `postinstall` script automatically runs `prisma generate`. If it doesn't, run `bun run db:generate` manually.
+> **Note**: The `postinstall` script runs `mkdir -p db && prisma generate` automatically. If it doesn't, run `bun run db:generate` manually.
 
 #### Step 5: Configure and Initialize
 
@@ -709,7 +712,7 @@ DATABASE_URL=file:C:/Users/username/mot-hashcat.db
 | `build` | Build the production standalone bundle |
 | `start` | Start the production server (requires build first) |
 | `lint` | Run ESLint to check code quality |
-| `postinstall` | Automatically runs `prisma generate` after `bun install` / `npm install` |
+| `postinstall` | Creates `db/` directory + runs `prisma generate` after `bun install` / `npm install` |
 | `db:push` | Push the Prisma schema to the database |
 | `db:generate` | Generate the Prisma client manually |
 | `db:reset` | Reset the database (destroys all data) |
@@ -1003,7 +1006,7 @@ npx prisma generate
 
 #### "Database connection error"
 
-Ensure the `DATABASE_URL` in `.env` points to a valid, writable path. The `db/` directory must exist:
+Ensure the `DATABASE_URL` in `.env` points to a valid, writable path. The `db/` directory must exist. The `postinstall` and `predev` scripts create it automatically, but if you need to create it manually:
 
 ```bash
 mkdir -p db
