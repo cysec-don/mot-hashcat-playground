@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
   // at runtime from node_modules, preventing the "Cannot find module
   // '@prisma/client-<hash>'" error.
   serverExternalPackages: ["@prisma/client", "@prisma/client/runtime", ".prisma/client"],
+  // Allow dev origins for preview
+  allowedDevOrigins: ["*.space-z.ai"],
 };
 
 export default nextConfig;
