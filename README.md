@@ -211,7 +211,7 @@ The platform has been **penetration-tested by 10 parallel pentest agents** and h
 | **Certificate Security** | CSPRNG-generated IDs (32^8 keyspace), no name-based enumeration |
 | **AI Tutor Hardening** | System prompt extraction prevention, prompt-injection pattern filtering, response post-filtering |
 | **CSV Formula Injection** | Export prefixes cells starting with `=+-@\t\r` with single quote |
-| **Prisma Turbopack Fix** | `serverExternalPackages` config prevents `Cannot find module @prisma/client-<hash>` error |
+| **Prisma Turbopack Fix** | Dynamic `require()` + `serverExternalPackages` + `predev` cache clear prevents `Cannot find module @prisma/client-<hash>` error |
 
 ---
 
@@ -286,13 +286,13 @@ mot-hashcat-playground/
 │   │   ├── achievements-data.ts     # 7 ranks + 16 achievements
 │   │   ├── hashcat-data.ts          # Wordlists, rules, masks, attack modes reference
 │   │   ├── certificate-pdf.ts       # PDF certificate generator (jsPDF)
-│   │   ├── db.ts                    # Prisma client (globalThis singleton)
+│   │   ├── db.ts                    # Prisma client (dynamic require, globalThis singleton)
 │   │   └── utils.ts                 # Utility functions (cn, etc.)
 │   └── proxy.ts                     # Security headers proxy (CSP, HSTS, TRACE block)
 ├── .env.example                     # Environment variable template
 ├── .gitignore                       # Git ignore rules
 ├── next.config.ts                   # Next.js config (serverExternalPackages, poweredByHeader)
-├── package.json                     # Dependencies and scripts (postinstall: prisma generate)
+├── package.json                     # Dependencies and scripts (predev, postinstall, prebuild: prisma generate)
 ├── LICENSE                          # MIT License
 └── README.md                        # This file
 ```
@@ -408,12 +408,12 @@ bun run db:push
 # OR: npx prisma db push
 ```
 
-> **Note**: If you see a Prisma module error like `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate` to regenerate the client. The `next.config.ts` already marks `@prisma/client` as a server-external package to prevent Turbopack bundling issues.
+> **Note**: If you see a Prisma module error like `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate` to regenerate the client. The project uses `require()` instead of `import` in `db.ts` and includes a `predev` script that auto-clears the `.next` cache — see [Troubleshooting](#cannot-find-module-prismaclient-hash-turbopack-error) for details.
 
 #### Step 7: Start the Development Server
 
 ```bash
-# Using Bun
+# Using Bun (predev script auto-regenerates Prisma + clears cache)
 bun run dev
 
 # OR using npm
@@ -470,11 +470,12 @@ cp .env.example .env
 bun run db:push
 ```
 
-> **Note**: If you see `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate`.
+> **Note**: If you see a Prisma module error, the `predev` script handles this automatically. See [Troubleshooting](#cannot-find-module-prismaclient-hash-turbopack-error) for manual steps.
 
 #### Step 5: Start the Server
 
 ```bash
+# predev script auto-regenerates Prisma + clears .next cache
 bun run dev
 ```
 
@@ -527,11 +528,12 @@ cp .env.example .env
 bun run db:push
 ```
 
-> **Note**: If you see `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate`.
+> **Note**: If you see a Prisma module error, the `predev` script handles this automatically. See [Troubleshooting](#cannot-find-module-prismaclient-hash-turbopack-error) for manual steps.
 
 #### Step 5: Start the Server
 
 ```bash
+# predev script auto-regenerates Prisma + clears .next cache
 bun run dev
 ```
 
@@ -591,11 +593,12 @@ Copy-Item .env.example .env
 bun run db:push   # OR: npx prisma db push
 ```
 
-> **Note**: If you see `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate` (or `npx prisma generate`).
+> **Note**: If you see a Prisma module error, the `predev` script handles this automatically. See [Troubleshooting](#cannot-find-module-prismaclient-hash-turbopack-error) for manual steps.
 
 #### Step 7: Start the Development Server
 
 ```powershell
+# predev script auto-regenerates Prisma + clears .next cache
 bun run dev   # OR: npm run dev
 ```
 
@@ -663,11 +666,12 @@ cp .env.example .env
 bun run db:push
 ```
 
-> **Note**: If you see `Cannot find module '@prisma/client-<hash>'`, run `bun run db:generate`.
+> **Note**: If you see a Prisma module error, the `predev` script handles this automatically. See [Troubleshooting](#cannot-find-module-prismaclient-hash-turbopack-error) for manual steps.
 
 #### Step 6: Start the Server
 
 ```bash
+# predev script auto-regenerates Prisma + clears .next cache
 bun run dev
 ```
 
@@ -699,8 +703,10 @@ DATABASE_URL=file:C:/Users/username/mot-hashcat.db
 
 | Script | Description |
 |--------|-------------|
-| `dev` | Start the development server on port 3000 |
-| `build` | Generate Prisma client + build the production standalone bundle |
+| `dev` | Start the development server on port 3000 (auto-runs `predev` first) |
+| `predev` | Automatically regenerates Prisma client + clears `.next` cache before each dev start |
+| `prebuild` | Automatically regenerates Prisma client before each build |
+| `build` | Build the production standalone bundle |
 | `start` | Start the production server (requires build first) |
 | `lint` | Run ESLint to check code quality |
 | `postinstall` | Automatically runs `prisma generate` after `bun install` / `npm install` |
@@ -721,6 +727,8 @@ npm run dev
 ```
 
 The dev server runs at **http://localhost:3000** with hot-reloading.
+
+> **Note**: The `predev` script runs automatically before each `bun run dev` — it regenerates the Prisma client and clears the `.next` cache to prevent the Turbopack `@prisma/client-<hash>` error. You don't need to manually run `prisma generate` or clear caches.
 
 ### Production Mode
 
@@ -814,7 +822,7 @@ MOT Hashcat Playground has been penetration-tested by 10 parallel pentest agents
 | **Certificate Security** | CSPRNG-generated IDs (32^8 keyspace), no name-based enumeration |
 | **AI Tutor Hardening** | System prompt extraction prevention, prompt-injection pattern filtering, response post-filtering |
 | **CSV Formula Injection** | Export prefixes cells starting with `=+-@\t\r` with single quote |
-| **Prisma Turbopack Fix** | `serverExternalPackages` config prevents `Cannot find module @prisma/client-<hash>` error |
+| **Prisma Turbopack Fix** | Dynamic `require()` + `serverExternalPackages` + `predev` cache clear prevents `Cannot find module @prisma/client-<hash>` error |
 
 ### Security Best Practices for Production Deployment
 
@@ -950,22 +958,37 @@ Error: Failed to load external module @prisma/client-2c3a283f134fdcb6
 ResolveMessage: Cannot find module '@prisma/client-2c3a283f134fdcb6'
 ```
 
-**This project already includes the fix** in `next.config.ts` via `serverExternalPackages`. If you still see the error:
+**This project includes a permanent fix** using three complementary approaches:
+
+1. **`src/lib/db.ts`** — Uses `require("@prisma/client")` instead of `import` to force runtime resolution, bypassing Turbopack's static bundling entirely
+2. **`next.config.ts`** — `serverExternalPackages` config tells Turbopack to NOT bundle `@prisma/client`
+3. **`package.json`** — `predev` script automatically regenerates the Prisma client and clears the `.next` cache before every `bun run dev` start
+
+If you still see the error after pulling the latest code, run:
 
 ```bash
-# 1. Regenerate the Prisma client
+# 1. Delete the entire .next directory (not just cache)
+rm -rf .next
+
+# 2. Regenerate the Prisma client
 bun run db:generate
 # OR: npx prisma generate
 
-# 2. Clear the Next.js cache and restart
-rm -rf .next/cache .next/dev
+# 3. Restart the dev server (predev will auto-clear cache + regenerate)
 bun run dev
 ```
 
-If the error persists, ensure your `next.config.ts` contains:
+If the error persists, verify your `next.config.ts` contains:
 
 ```typescript
 serverExternalPackages: ["@prisma/client", "@prisma/client/runtime", ".prisma/client"],
+```
+
+And verify `src/lib/db.ts` uses `require()` instead of `import`:
+
+```typescript
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { PrismaClient } = require("@prisma/client");
 ```
 
 #### "Cannot find module '@prisma/client'" (general)
